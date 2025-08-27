@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMAC Voter Analytics</title>
+    
+    <!-- Dependencies -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --surface-0: #0f172a;
+            --surface-1: #1e293b;
+            --surface-2: #334155;
+            --primary: #3b82f6;
+            --primary-light: #60a5fa;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: rgba(148, 163, 184, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--surface-0);
+            color: var(--text-primary);
+        }
+
+        .card {
+            background: var(--surface-1);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        /* Dropdown Styles */
+        .dropdown-container {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 0.5rem;
+            background: var(--surface-1);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            z-index: 50;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-feature-settings: "tnum";
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                var(--surface-1) 0%,
+                var(--surface-2) 50%,
+                var(--surface-1) 100%
+            );
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Chat Interface */
+        .chat-container {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 400px;
+            background: var(--surface-1);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            z-index: 40;
+            transition: all 0.3s ease;
+        }
+
+        .chat-container.collapsed {
+            height: 60px;
+            cursor: pointer;
+        }
+
+        .chat-container.expanded {
+            height: 500px;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            background: var(--surface-1);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .chat-messages {
+            height: calc(100% - 120px);
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .chat-message {
+            margin-bottom: 1rem;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: messageAppear 0.3s forwards;
+        }
+
+        @keyframes messageAppear {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-ai {
+            background: var(--surface-2);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-right: 2rem;
+        }
+
+        .message-user {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-left: 2rem;
+        }
+
+        .chat-input {
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.5rem;
+            background: var(--surface-1);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .chat-input input {
+            flex: 1;
+            background: var(--surface-2);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .chat-input input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--surface-0);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--surface-2);
+            border-radius: 4px;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            height: 4px;
+            background: var(--surface-2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--surface-0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--surface-2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div class="text-center">
+            <div class="spinner mb-4"></div>
+            <p class="text-sm text-text-secondary">Loading dashboard data...</p>
+        </div>
+    </div>
+
+    <div class="min-h-screen p-6 opacity-0 transition-opacity duration-300" id="dashboard-content">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold">AMAC Voter Analytics</h1>
+                <p class="text-text-secondary">Last updated: April 2024</p>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <!-- Quick Filters -->
+                <div class="flex items-center gap-2 bg-surface-1 rounded-lg p-1">
+                    <button class="px-3 py-1.5 rounded text-sm font-medium bg-primary text-white">All Data</button>
+                    <button class="px-3 py-1.5 rounded text-sm font-medium text-text-secondary hover:text-white">Last Election</button>
+                    <button class="px-3 py-1.5 rounded text-sm font-medium text-text-secondary hover:text-white">Custom</button>
+                </div>
+
+                <!-- Export -->
+                <button class="flex items-center gap-2 px-4 py-2 bg-surface-1 rounded-lg hover:bg-surface-2">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>Export</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-12 gap-6">
+            <!-- Left Sidebar - Filters -->
+            <div class="col-span-3 space-y-6">
+                <!-- Election Period -->
+                <div class="card p-4">
+                    <h3 class="font-medium mb-3">Election Period</h3>
+                    <div class="dropdown-container" x-data="{ open: false, selected: ['November 2024'] }">
+                        <button @click="open = !open" class="w-full p-2 flex items-center justify-between bg-surface-2 rounded hover:bg-surface-2/80">
+                            <span class="text-sm" x-text="selected.length ? selected.join(', ') : 'Select periods'">Select periods</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div x-show="open" @click.away="open = false" class="dropdown-menu">
+                            <div class="p-2 space-y-1">
+                                <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
+                                    <input type="checkbox" class="text-primary" value="November 2024" x-model="selected">
+                                    <span>November 2024</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
+                                    <input type="checkbox" class="text-primary" value="August 2024" x-model="selected">
+                                    <span>August 2024</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
+                                    <input type="checkbox" class="text-primary" value="November 2023" x-model="selected">
+                                    <span>November 2023</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
+                                    <input type="checkbox" class="text-primary" value="August 2023" x-model="selected">
+                                    <span>August 2023</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jurisdiction Type -->
+                <div class="card p-4">
+                    <h3 class="font-medium mb-3">Jurisdiction Type</h3>
+                    <div class="dropdown-container" x-data="{ open: false, selected: ['State Level'] }">
+                        <button @click="open = !open" class="w-full p-2 flex items-center justify-between bg-surface-2 rounded hover:bg-surface-2/80">
+                            <span class="text-sm" x-text="selected.length ? selected.join(', ') : 'Select jurisdictions'">Select jurisdictions</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div x-show="open" @click.away="open = false" class="dropdown-menu">
+                            <div class="p-2 space-y-1">
+                                <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
+                                    <input type="checkbox" class="text-primary" value="State Level" x-model="selected">
+                                    <span>State Level</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
+                                    <input type="checkbox" class="text-primary" value="Counties" x-model="selected">
+                                    <span>Counties</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
+                                    <input type="checkbox" class="text-primary" value="Congressional Districts" x-model="selected">
+                                    <span>Congressional Districts</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
+                                    <input type="checkbox" class="text-primary" value="Cities" x-model="selected">
+                                    <span>Cities</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
+                                    <input type="checkbox" class="text-primary" value="School Districts" x-model="selected">
+                                    <span>School Districts</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ethnicity Filter -->
+                <div class="card p-4">
+                    <h3 class="font-medium mb-3">Ethnicity Filter</h3>
+                    <div class="dropdown-container" x-data="{ open: false, selected: ['South Asian', 'Middle Eastern'] }">
+                        <button @click="open = !open" class="w-full p-2 flex items-center justify-between bg-surface-2 rounded hover:bg-surface-2/80">
+                            <span class="text-sm" x-text="selected.length ? selected.join(', ') : 'Select ethnicities'">Select ethnicities</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div x-show="open" @click.away="open = false" class="dropdown-menu">
+                            <div class="p-2 space-y-1">
+                                <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
+                                    <input type="checkbox" class="text-primary" value="South Asian" x-model="selected">
+                                    <span>South Asian</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
+                                    <input type="checkbox" class="text-primary" value="Middle Eastern" x-model="selected">
+                                    <span>Middle Eastern</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
+                                    <input type="checkbox" class="text-primary" value="African" x-model="selected">
+                                    <span>African</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
+                                    <input type="checkbox" class="text-primary" value="Southeast Asian" x-model="selected">
+                                    <span>Southeast Asian</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-span-9 space-y-6">
+                <!-- Key Metrics -->
+                <div class="grid grid-cols-4 gap-6">
+                    <div class="card card-hover p-4">
+                        <p class="text-text-secondary text-sm mb-1">Total Registered Voters</p>
+                        <h3 class="text-2xl font-bold stat-value">247,890</h3>
+                        <div class="flex items-center gap-1 mt-2 text-success text-sm">
+                            <i data-lucide="trending-up" class="w-4 h-4"></i>
+                            <span>12.4%</span>
+                        </div>
+                    </div>
+                    <div class="card card-hover p-4">
+                        <p class="text-text-secondary text-sm mb-1">Current Turnout</p>
+                        <h3 class="text-2xl font-bold stat-value">76%</h3>
+                        <div class="flex items-center gap-1 mt-2 text-success text-sm">
+                            <i data-lucide="trending-up" class="w-4 h-4"></i>
+                            <span>4.2%</span>
+                        </div>
+                    </div>
+                    <div class="card card-hover p-4">
+                        <p class="text-text-secondary text-sm mb-1">New Registrations</p>
+                        <h3 class="text-2xl font-bold stat-value">1,245</h3>
+                        <div class="flex items-center gap-1 mt-2 text-warning text-sm">
+                            <i data-lucide="trending-down" class="w-4 h-4"></i>
+                            <span>2.1%</span>
+                        </div>
+                    </div>
+                    <div class="card card-hover p-4">
+                        <p class="text-text-secondary text-sm mb-1">Active Districts</p>
+                        <h3 class="text-2xl font-bold stat-value">42</h3>
+                        <div class="mt-2 text-text-secondary text-sm">
+                            <span>of 49 total</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map & Charts -->
+                <div class="grid grid-cols-12 gap-6">
+                    <!-- Top Row: Map and Turnout -->
+                    <div class="col-span-8 card" style="height: 400px">
+                        <div id="map" class="w-full h-full rounded-lg"></div>
+                    </div>
+
+                    <div class="col-span-4 card p-4" style="height: 400px">
+                        <h3 class="font-medium mb-4">Turnout by Election</h3>
+                        <canvas id="turnoutChart"></canvas>
+                    </div>
+
+                    <!-- Bottom Row: Jurisdiction and Ethnicity -->
+                    <div class="col-span-8 card p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-medium">Top Jurisdictions</h3>
+                            <select class="bg-surface-2 rounded px-2 py-1 text-sm">
+                                <option>By Voter Count</option>
+                                <option>By Turnout %</option>
+                            </select>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span>King County</span>
+                                    <span class="stat-value">89,450</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span>7th Congressional District</span>
+                                    <span class="stat-value">45,230</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill" style="width: 50%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span>Seattle</span>
+                                    <span class="stat-value">32,180</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill" style="width: 35%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-4 card p-4">
+                        <h3 class="font-medium mb-4">Ethnicity Distribution</h3>
+                        <div class="flex justify-center">
+                            <div style="height: 200px; width: 100%">
+                                <canvas id="ethnicityChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm text-text-secondary">
+                            <div class="flex justify-between">
+                                <span>Total Sample Size:</span>
+                                <span class="font-medium text-text-primary">247,890</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div class="chat-container" 
+         x-data="{ 
+            expanded: false, 
+            messages: [],
+            sendMessage(text) {
+                if (text.trim()) {
+                    this.messages.push({type: 'user', text: text});
+                    setTimeout(() => {
+                        this.messages.push({
+                            type: 'ai', 
+                            text: 'Based on the voter data, ' + this.generateResponse(text)
+                        });
+                        this.$nextTick(() => {
+                            document.getElementById('chat-messages').scrollTop = 
+                            document.getElementById('chat-messages').scrollHeight;
+                        });
+                    }, 300);
+                }
+            },
+            generateResponse(question) {
+                // Simple response generation based on keywords
+                if (question.toLowerCase().includes('turnout')) {
+                    return 'the voter turnout shows an increasing trend with 76% in November 2024 compared to 72% in November 2023.';
+                } else if (question.toLowerCase().includes('district') || question.toLowerCase().includes('highest')) {
+                    return 'King County has the highest number of eligible voters with 89,450 registered voters.';
+                } else if (question.toLowerCase().includes('compare')) {
+                    return 'comparing the last two elections, we see a 4.2% increase in voter turnout.';
+                }
+                return 'I can help you analyze specific trends in voter turnout, district comparisons, or election period data.';
+            }
+         }"
+         :class="expanded ? 'expanded' : 'collapsed'">
+        
+        <div class="chat-header" @click="expanded = !expanded">
+            <div class="flex items-center gap-2">
+                <i data-lucide="message-circle" class="w-5 h-5"></i>
+                <span class="font-medium">Ask about the data</span>
+            </div>
+            <i data-lucide="chevron-up" class="w-5 h-5" x-show="expanded"></i>
+            <i data-lucide="chevron-down" class="w-5 h-5" x-show="!expanded"></i>
+        </div>
+        
+        <div x-show="expanded" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform translate-y-4"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             class="chat-messages" 
+             id="chat-messages">
+            
+            <div class="chat-message">
+                <div class="message-ai">
+                    Hi! I can help you analyze the voter data. Try asking questions like:
+                    <ul class="mt-2 ml-4 list-disc text-sm">
+                        <li>What's the voter turnout trend?</li>
+                        <li>Which district has the highest turnout?</li>
+                        <li>Compare turnout between elections</li>
+                    </ul>
+                </div>
+            </div>
+
+            <template x-for="message in messages">
+                <div class="chat-message">
+                    <div :class="message.type === 'user' ? 'message-user' : 'message-ai'"
+                         x-text="message.text">
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div x-show="expanded" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform translate-y-4"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             class="chat-input">
+            <input type="text" 
+                   placeholder="Ask a question about the data..."
+                   @keyup.enter="sendMessage($event.target.value); $event.target.value = ''">
+            <button class="p-2 hover:bg-surface-2 rounded-lg" 
+                    @click="const input = $el.previousElementSibling; sendMessage(input.value); input.value = ''"
+                    title="Send message">
+                <i data-lucide="send" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Simulate loading state
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loading-overlay').style.opacity = '0';
+                document.getElementById('dashboard-content').style.opacity = '1';
+                setTimeout(() => {
+                    document.getElementById('loading-overlay').style.display = 'none';
+                }, 300);
+            }, 1000);
+        });
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Initialize Mapbox
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic2FqYS1yIiwiYSI6ImNtZWo1OXRqbzA4NHcydG1zOTNlYjM0d2oifQ.wpPHOdwRETWYP1BA8EB1Hg';
+        
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/dark-v11',
+            center: [-120.740135, 47.751076],
+            zoom: 6,
+            pitch: 45,
+            bearing: -17.6
+        });
+
+        // Add navigation controls
+        map.addControl(new mapboxgl.NavigationControl());
+
+        // Initialize Charts
+        const turnoutCtx = document.getElementById('turnoutChart').getContext('2d');
+        new Chart(turnoutCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Aug 23', 'Nov 23', 'Aug 24', 'Nov 24', 'Aug 25'],
+                datasets: [{
+                    data: [65, 72, 68, 76, null],
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#94a3b8'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#94a3b8'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        const ethnicityCtx = document.getElementById('ethnicityChart').getContext('2d');
+        new Chart(ethnicityCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['South Asian', 'Middle Eastern', 'African', 'Southeast Asian'],
+                datasets: [{
+                    data: [45, 30, 15, 10],
+                    backgroundColor: ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#94a3b8',
+                            padding: 10,
+                            usePointStyle: true
+                        }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+
+        // Cache common filter combinations
+        const cachedFilters = {
+            'last-election': {
+                period: 'November 2024',
+                jurisdiction: 'County',
+                ethnicity: 'All'
+            }
+        };
+
+        // Handle filter changes
+        document.querySelectorAll('input[type="checkbox"], button').forEach(element => {
+            element.addEventListener('click', () => {
+                // Simulate loading state for filter changes
+                const overlay = document.createElement('div');
+                overlay.className = 'absolute inset-0 bg-surface-0 bg-opacity-50 flex items-center justify-center';
+                overlay.innerHTML = '<div class="spinner"></div>';
+                
+                setTimeout(() => {
+                    overlay.remove();
+                }, 500);
+            });
+        });
+    </script>
+</body>
+</html>
