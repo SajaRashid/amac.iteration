@@ -57,10 +57,10 @@
             left: 0;
             right: 0;
             margin-top: 0.5rem;
-            background: var(--surface-1);
-            border: 1px solid var(--border);
+            background: white;
+            border: 1px solid #e5e7eb;
             border-radius: 0.75rem;
-            box-shadow: var(--shadow-md);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             z-index: 50;
             max-height: 250px;
             overflow-y: auto;
@@ -289,101 +289,92 @@
             </div>
         </header>
 
-        <!-- Main Grid -->
-        <div class="grid grid-cols-12 gap-6">
-            <!-- Left Sidebar - Filters -->
-            <div class="col-span-3">
-                <div class="sticky top-6 space-y-4">
-                    <!-- Election Period -->
-                    <div class="card p-4">
-                        <h3 class="font-medium mb-3">Election Period</h3>
-                        <div class="space-y-3">
-                            <div class="flex items-center gap-3">
-                                <div class="flex-1">
-                                    <label class="block text-sm text-gray-500 mb-1">Start Date</label>
-                                    <input type="date" class="w-full bg-surface-2 border-none rounded p-2 text-sm focus:ring-1 focus:ring-primary" id="startDate" />
-                                </div>
-                                <div class="flex-1">
-                                    <label class="block text-sm text-gray-500 mb-1">End Date</label>
-                                    <input type="date" class="w-full bg-surface-2 border-none rounded p-2 text-sm focus:ring-1 focus:ring-primary" id="endDate" />
-                                </div>
-                            </div>
-                            <button onclick="applyDateRange()" class="w-full bg-primary text-white rounded py-2 text-sm hover:bg-primary-dark transition-colors">
-                                Apply Filter
-                            </button>
+        <!-- Filter Bar -->
+        <div class="bg-white rounded-lg p-4 mb-6 shadow-md border border-gray-100" style="box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);">
+            <div class="grid grid-cols-3 gap-4">
+                <!-- Election Period -->
+                <div class="flex items-end gap-2">
+                    <div class="flex-1">
+                        <label class="block text-xs text-gray-500 mb-1">Start Date</label>
+                        <input type="date" class="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-sm focus:ring-1 focus:ring-primary hover:border-gray-300 transition-colors" id="startDate" />
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs text-gray-500 mb-1">End Date</label>
+                        <input type="date" class="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-sm focus:ring-1 focus:ring-primary hover:border-gray-300 transition-colors" id="endDate" />
+                    </div>
+                    <button onclick="applyDateRange()" class="bg-primary text-white rounded px-3 py-1.5 text-sm hover:bg-primary-dark transition-colors h-[34px]">
+                        Apply
+                    </button>
+                </div>
+
+                <!-- Jurisdiction Type -->
+                <div class="dropdown-container" x-data="{ open: false, selected: ['State Level'] }">
+                    <label class="block text-xs text-gray-500 mb-1">Jurisdiction Type</label>
+                    <button @click="open = !open" class="w-full p-1.5 flex items-center justify-between bg-gray-50 border border-gray-200 rounded hover:border-gray-300 transition-colors">
+                        <span class="text-sm" x-text="selected.length ? selected.join(', ') : 'Select jurisdictions'">Select jurisdictions</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
+                    <div x-show="open" @click.away="open = false" class="dropdown-menu">
+                        <div class="p-2 space-y-1">
+                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
+                                <input type="checkbox" class="text-primary" value="State Level" x-model="selected">
+                                <span class="text-sm">State Level</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
+                                <input type="checkbox" class="text-primary" value="Counties" x-model="selected">
+                                <span class="text-sm">Counties</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
+                                <input type="checkbox" class="text-primary" value="Congressional Districts" x-model="selected">
+                                <span class="text-sm">Congressional Districts</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
+                                <input type="checkbox" class="text-primary" value="Cities" x-model="selected">
+                                <span class="text-sm">Cities</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
+                                <input type="checkbox" class="text-primary" value="School Districts" x-model="selected">
+                                <span class="text-sm">School Districts</span>
+                            </label>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Jurisdiction Type -->
-                    <div class="card p-4">
-                        <h3 class="font-medium mb-3">Jurisdiction Type</h3>
-                        <div class="dropdown-container" x-data="{ open: false, selected: ['State Level'] }">
-                            <button @click="open = !open" class="w-full p-2 flex items-center justify-between bg-surface-2 rounded hover:bg-surface-2/80">
-                                <span class="text-sm" x-text="selected.length ? selected.join(', ') : 'Select jurisdictions'">Select jurisdictions</span>
-                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                            </button>
-                            <div x-show="open" @click.away="open = false" class="dropdown-menu">
-                                <div class="p-2 space-y-1">
-                                    <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
-                                        <input type="checkbox" class="text-primary" value="State Level" x-model="selected">
-                                        <span>State Level</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
-                                        <input type="checkbox" class="text-primary" value="Counties" x-model="selected">
-                                        <span>Counties</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
-                                        <input type="checkbox" class="text-primary" value="Congressional Districts" x-model="selected">
-                                        <span>Congressional Districts</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
-                                        <input type="checkbox" class="text-primary" value="Cities" x-model="selected">
-                                        <span>Cities</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
-                                        <input type="checkbox" class="text-primary" value="School Districts" x-model="selected">
-                                        <span>School Districts</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Ethnicity Filter -->
-                    <div class="card p-4">
-                        <h3 class="font-medium mb-3">Ethnicity Filter</h3>
-                        <div class="dropdown-container" x-data="{ open: false, selected: ['South Asian', 'Middle Eastern'] }">
-                            <button @click="open = !open" class="w-full p-2 flex items-center justify-between bg-surface-2 rounded hover:bg-surface-2/80">
-                                <span class="text-sm" x-text="selected.length ? selected.join(', ') : 'Select ethnicities'">Select ethnicities</span>
-                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                            </button>
-                            <div x-show="open" @click.away="open = false" class="dropdown-menu">
-                                <div class="p-2 space-y-1">
-                                    <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
-                                        <input type="checkbox" class="text-primary" value="South Asian" x-model="selected">
-                                        <span>South Asian</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
-                                        <input type="checkbox" class="text-primary" value="Middle Eastern" x-model="selected">
-                                        <span>Middle Eastern</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
-                                        <input type="checkbox" class="text-primary" value="African" x-model="selected">
-                                        <span>African</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-2 rounded hover:bg-surface-2 cursor-pointer">
-                                        <input type="checkbox" class="text-primary" value="Southeast Asian" x-model="selected">
-                                        <span>Southeast Asian</span>
-                                    </label>
-                                </div>
-                            </div>
+                <!-- Ethnicity Filter -->
+                <div class="dropdown-container" x-data="{ open: false, selected: ['South Asian', 'Middle Eastern'] }">
+                    <label class="block text-xs text-gray-500 mb-1">Ethnicity</label>
+                    <button @click="open = !open" class="w-full p-1.5 flex items-center justify-between bg-gray-50 border border-gray-200 rounded hover:border-gray-300 transition-colors">
+                        <span class="text-sm" x-text="selected.length ? selected.join(', ') : 'Select ethnicities'">Select ethnicities</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
+                    <div x-show="open" @click.away="open = false" class="dropdown-menu">
+                        <div class="p-2 space-y-1">
+                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
+                                <input type="checkbox" class="text-primary" value="South Asian" x-model="selected">
+                                <span class="text-sm">South Asian</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
+                                <input type="checkbox" class="text-primary" value="Middle Eastern" x-model="selected">
+                                <span class="text-sm">Middle Eastern</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
+                                <input type="checkbox" class="text-primary" value="African" x-model="selected">
+                                <span class="text-sm">African</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
+                                <input type="checkbox" class="text-primary" value="Southeast Asian" x-model="selected">
+                                <span class="text-sm">Southeast Asian</span>
+                            </label>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
+        <!-- Main Grid -->
+        <div class="grid grid-cols-12 gap-6">
             <!-- Main Content -->
-            <div class="col-span-9 space-y-6">
+            <div class="col-span-12 space-y-6">
                 <!-- Key Metrics -->
                 <div class="grid grid-cols-4 gap-6">
                     <div class="card card-hover p-4">
