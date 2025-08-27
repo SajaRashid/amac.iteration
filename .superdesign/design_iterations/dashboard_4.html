@@ -290,80 +290,95 @@
         </header>
 
         <!-- Filter Bar -->
-        <div class="bg-white rounded-lg p-4 mb-6 shadow-md border border-gray-100" style="box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);">
-            <div class="grid grid-cols-3 gap-4">
-                <!-- Election Period -->
-                <div class="flex items-end gap-2">
-                    <div class="flex-1">
-                        <label class="block text-xs text-gray-500 mb-1">Start Date</label>
-                        <input type="date" class="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-sm focus:ring-1 focus:ring-primary hover:border-gray-300 transition-colors" id="startDate" />
-                    </div>
-                    <div class="flex-1">
-                        <label class="block text-xs text-gray-500 mb-1">End Date</label>
-                        <input type="date" class="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-sm focus:ring-1 focus:ring-primary hover:border-gray-300 transition-colors" id="endDate" />
-                    </div>
-                    <button onclick="applyDateRange()" class="bg-primary text-white rounded px-3 py-1.5 text-sm hover:bg-primary-dark transition-colors h-[34px]">
-                        Apply
+        <div class="flex gap-3 mb-4">
+            <!-- Election Period -->
+            <div class="flex-1 bg-white rounded-lg shadow-sm p-2">
+                <h3 class="text-xs font-medium mb-1.5">Election Period</h3>
+                <div class="dropdown-container" x-data="{ open: false, dateRange: '1/1/2023 - 12/31/2024' }">
+                    <button @click="open = !open" class="w-full h-[34px] flex items-center justify-between bg-white border border-gray-200 rounded px-2 hover:border-gray-300 transition-colors">
+                        <div class="flex items-center gap-1.5">
+                            <i data-lucide="calendar" class="w-4 h-4 text-gray-500"></i>
+                            <span class="text-sm text-gray-900 leading-none" x-text="dateRange">1/1/2023 - 12/31/2024</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 flex-shrink-0"></i>
                     </button>
+                    <div x-show="open" @click.away="open = false" class="dropdown-menu mt-1">
+                        <div class="p-2">
+                            <div class="flex gap-2 mb-2">
+                                <input type="date" class="flex-1 h-[34px] bg-gray-50 border border-gray-200 rounded px-2 text-sm" id="startDate" />
+                                <span class="text-gray-400">-</span>
+                                <input type="date" class="flex-1 h-[34px] bg-gray-50 border border-gray-200 rounded px-2 text-sm" id="endDate" />
+                            </div>
+                            <div class="flex justify-end">
+                                <button onclick="applyDateRange()" class="bg-primary text-white rounded px-3 h-[34px] text-sm hover:bg-primary-dark transition-colors">
+                                    Apply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <!-- Jurisdiction Type -->
+            <!-- Jurisdiction Type -->
+            <div class="flex-1 bg-white rounded-lg shadow-sm p-2">
+                <h3 class="text-xs font-medium mb-1.5">Jurisdiction Type</h3>
                 <div class="dropdown-container" x-data="{ open: false, selected: ['State Level'] }">
-                    <label class="block text-xs text-gray-500 mb-1">Jurisdiction Type</label>
-                    <button @click="open = !open" class="w-full p-1.5 flex items-center justify-between bg-gray-50 border border-gray-200 rounded hover:border-gray-300 transition-colors">
-                        <span class="text-sm" x-text="selected.length ? selected.join(', ') : 'Select jurisdictions'">Select jurisdictions</span>
-                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    <button @click="open = !open" class="w-full h-[34px] flex items-center justify-between bg-white border border-gray-200 rounded px-2 hover:border-gray-300 transition-colors">
+                        <span class="text-sm text-gray-900 leading-none" x-text="selected.length ? selected.join(', ') : 'Select jurisdictions'">Select jurisdictions</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 flex-shrink-0 ml-1.5"></i>
                     </button>
-                    <div x-show="open" @click.away="open = false" class="dropdown-menu">
-                        <div class="p-2 space-y-1">
-                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
-                                <input type="checkbox" class="text-primary" value="State Level" x-model="selected">
-                                <span class="text-sm">State Level</span>
+                    <div x-show="open" @click.away="open = false" class="dropdown-menu mt-1">
+                        <div class="py-1">
+                            <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
+                                <input type="checkbox" class="text-primary rounded" value="State Level" x-model="selected">
+                                <span class="text-sm text-gray-900">State Level</span>
                             </label>
-                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
-                                <input type="checkbox" class="text-primary" value="Counties" x-model="selected">
-                                <span class="text-sm">Counties</span>
+                            <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
+                                <input type="checkbox" class="text-primary rounded" value="Counties" x-model="selected">
+                                <span class="text-sm text-gray-900">Counties</span>
                             </label>
-                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
-                                <input type="checkbox" class="text-primary" value="Congressional Districts" x-model="selected">
-                                <span class="text-sm">Congressional Districts</span>
+                            <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
+                                <input type="checkbox" class="text-primary rounded" value="Congressional Districts" x-model="selected">
+                                <span class="text-sm text-gray-900">Congressional Districts</span>
                             </label>
-                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
-                                <input type="checkbox" class="text-primary" value="Cities" x-model="selected">
-                                <span class="text-sm">Cities</span>
+                            <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
+                                <input type="checkbox" class="text-primary rounded" value="Cities" x-model="selected">
+                                <span class="text-sm text-gray-900">Cities</span>
                             </label>
-                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
-                                <input type="checkbox" class="text-primary" value="School Districts" x-model="selected">
-                                <span class="text-sm">School Districts</span>
+                            <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
+                                <input type="checkbox" class="text-primary rounded" value="School Districts" x-model="selected">
+                                <span class="text-sm text-gray-900">School Districts</span>
                             </label>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Ethnicity Filter -->
+            <!-- Ethnicity Filter -->
+            <div class="flex-1 bg-white rounded-lg shadow-sm p-2">
+                <h3 class="text-xs font-medium mb-1.5">Ethnicity</h3>
                 <div class="dropdown-container" x-data="{ open: false, selected: ['South Asian', 'Middle Eastern'] }">
-                    <label class="block text-xs text-gray-500 mb-1">Ethnicity</label>
-                    <button @click="open = !open" class="w-full p-1.5 flex items-center justify-between bg-gray-50 border border-gray-200 rounded hover:border-gray-300 transition-colors">
-                        <span class="text-sm" x-text="selected.length ? selected.join(', ') : 'Select ethnicities'">Select ethnicities</span>
-                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    <button @click="open = !open" class="w-full h-[34px] flex items-center justify-between bg-white border border-gray-200 rounded px-2 hover:border-gray-300 transition-colors">
+                        <span class="text-sm text-gray-900 leading-none" x-text="selected.length ? selected.join(', ') : 'Select ethnicities'">Select ethnicities</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 flex-shrink-0 ml-1.5"></i>
                     </button>
-                    <div x-show="open" @click.away="open = false" class="dropdown-menu">
-                        <div class="p-2 space-y-1">
-                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
-                                <input type="checkbox" class="text-primary" value="South Asian" x-model="selected">
-                                <span class="text-sm">South Asian</span>
+                    <div x-show="open" @click.away="open = false" class="dropdown-menu mt-1">
+                        <div class="py-1">
+                            <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
+                                <input type="checkbox" class="text-primary rounded" value="South Asian" x-model="selected">
+                                <span class="text-sm text-gray-900">South Asian</span>
                             </label>
-                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
-                                <input type="checkbox" class="text-primary" value="Middle Eastern" x-model="selected">
-                                <span class="text-sm">Middle Eastern</span>
+                            <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
+                                <input type="checkbox" class="text-primary rounded" value="Middle Eastern" x-model="selected">
+                                <span class="text-sm text-gray-900">Middle Eastern</span>
                             </label>
-                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
-                                <input type="checkbox" class="text-primary" value="African" x-model="selected">
-                                <span class="text-sm">African</span>
+                            <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
+                                <input type="checkbox" class="text-primary rounded" value="African" x-model="selected">
+                                <span class="text-sm text-gray-900">African</span>
                             </label>
-                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-2 cursor-pointer">
-                                <input type="checkbox" class="text-primary" value="Southeast Asian" x-model="selected">
-                                <span class="text-sm">Southeast Asian</span>
+                            <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
+                                <input type="checkbox" class="text-primary rounded" value="Southeast Asian" x-model="selected">
+                                <span class="text-sm text-gray-900">Southeast Asian</span>
                             </label>
                         </div>
                     </div>
@@ -1160,13 +1175,23 @@
                 return;
             }
 
+            // Format dates for display
+            const formattedStartDate = new Date(startDate).toLocaleDateString();
+            const formattedEndDate = new Date(endDate).toLocaleDateString();
+            
+            // Update the displayed date range
+            const dateRangeElement = document.querySelector('[x-data*="dateRange"]');
+            if (dateRangeElement) {
+                const alpineData = Alpine.raw(dateRangeElement.__x.$data);
+                alpineData.dateRange = `${formattedStartDate} - ${formattedEndDate}`;
+                alpineData.open = false;
+            }
+
             // Update chart with filtered data
             const filteredData = filterDataByDateRange(startDate, endDate);
             turnoutChart.data.labels = filteredData.labels;
             turnoutChart.data.datasets[0].data = filteredData.data;
             turnoutChart.update();
-
-            closeDateRangePicker();
         }
 
         function filterDataByDateRange(startDate, endDate) {
