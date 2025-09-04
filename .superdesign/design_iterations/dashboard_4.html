@@ -305,26 +305,54 @@
             <!-- Election Period -->
             <div class="flex-1 bg-white rounded-lg shadow-sm p-2">
                 <h3 class="text-xs font-medium mb-1.5">Election Period</h3>
-                <div class="dropdown-container" x-data="{ open: false, dateRange: '1/1/2023 - 12/31/2024' }">
+                <div class="dropdown-container" x-data="{ 
+                    open: false,
+                    selectedElection: 'Nov 2024',
+                    elections: ['Aug 2025', 'Nov 2024', 'Aug 2024', 'Nov 2023', 'Aug 2023', 'Feb 2023'],
+                    updateElection(election) {
+                        this.selectedElection = election;
+                        // Update turnout data based on selected election
+                        const turnoutData = {
+                            'Aug 2025': 0,  // Future election
+                            'Nov 2024': 76,
+                            'Aug 2024': 68,
+                            'Nov 2023': 72,
+                            'Aug 2023': 65,
+                            'Feb 2023': 58
+                        };
+                        
+                        // Update the turnout stat
+                        document.querySelectorAll('.stat-value')[1].textContent = turnoutData[election] + '%';
+                        
+                        // Update chart to highlight selected election
+                        if (window.turnoutChart) {
+                            const allElections = ['Feb 2023', 'Aug 2023', 'Nov 2023', 'Aug 2024', 'Nov 2024', 'Aug 2025'];
+                            const data = allElections.map(e => turnoutData[e]);
+                            window.turnoutChart.data.datasets[0].data = data;
+                            window.turnoutChart.data.datasets[0].backgroundColor = data.map((d, i) => 
+                                allElections[i] === election ? '#1d4ed8' : '#2563eb'
+                            );
+                            window.turnoutChart.update();
+                        }
+                    }
+                }">
                     <button @click="open = !open" class="w-full h-[34px] flex items-center justify-between bg-white border border-gray-200 rounded px-2 hover:border-gray-300 transition-colors">
                         <div class="flex items-center gap-1.5">
                             <i data-lucide="calendar" class="w-4 h-4 text-gray-500"></i>
-                            <span class="text-sm text-gray-900 leading-none" x-text="dateRange">1/1/2023 - 12/31/2024</span>
+                            <span class="text-sm text-gray-900 leading-none" x-text="selectedElection"></span>
                         </div>
                         <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 flex-shrink-0"></i>
                     </button>
                     <div x-show="open" @click.away="open = false" class="dropdown-menu mt-1">
-                        <div class="p-2">
-                            <div class="flex gap-2 mb-2">
-                                <input type="date" class="flex-1 h-[34px] bg-gray-50 border border-gray-200 rounded px-2 text-sm" id="startDate" />
-                                <span class="text-gray-400">-</span>
-                                <input type="date" class="flex-1 h-[34px] bg-gray-50 border border-gray-200 rounded px-2 text-sm" id="endDate" />
-                            </div>
-                            <div class="flex justify-end">
-                                <button onclick="applyDateRange()" class="bg-primary text-white rounded px-3 h-[34px] text-sm hover:bg-primary-dark transition-colors">
-                                    Apply
+                        <div class="py-1">
+                            <template x-for="election in elections" :key="election">
+                                <button 
+                                    @click="updateElection(election); open = false"
+                                    class="w-full text-left px-3 py-1.5 hover:bg-gray-50 text-sm"
+                                    :class="{'text-primary font-medium': selectedElection === election}"
+                                    x-text="election">
                                 </button>
-                            </div>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -336,7 +364,7 @@
                 <div class="dropdown-container" 
                     x-data="{ 
                         open: false, 
-                        selected: ['State Level'],
+                        selected: 'State Level',
                         updateView() {
                             const data = {
                                 'State Level': { count: 247890, areas: ['Washington State'] },
@@ -344,13 +372,8 @@
                                 'Cities': { count: 32180, areas: ['Seattle', 'Bellevue', 'Tacoma'] }
                             };
 
-                            // Update voter count
-                            let totalVoters = 0;
-                            this.selected.forEach(type => {
-                                if (data[type]) {
-                                    totalVoters += data[type].count;
-                                }
-                            });
+                            // Update voter count with selected jurisdiction's data
+                            const totalVoters = data[this.selected]?.count || 0;
                             
                             // Update the stats
                             document.querySelectorAll('.stat-value')[0].textContent = totalVoters.toLocaleString();
@@ -358,35 +381,35 @@
                             // Update the map title based on selection
                             const mapTitle = document.querySelector('#map-title');
                             if (mapTitle) {
-                                mapTitle.textContent = 'Voter Distribution by ' + this.selected.join(' & ');
+                                mapTitle.textContent = 'Voter Distribution by ' + this.selected;
                             }
                         }
                     }"
                     @change="updateView">
                     <button @click="open = !open" class="w-full h-[34px] flex items-center justify-between bg-white border border-gray-200 rounded px-2 hover:border-gray-300 transition-colors">
-                        <span class="text-sm text-gray-900 leading-none" x-text="selected.length ? selected.join(', ') : 'Select jurisdictions'">Select jurisdictions</span>
+                        <span class="text-sm text-gray-900 leading-none" x-text="selected || 'Select jurisdiction'">Select jurisdiction</span>
                         <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 flex-shrink-0 ml-1.5"></i>
                     </button>
                     <div x-show="open" @click.away="open = false" class="dropdown-menu mt-1">
                         <div class="py-1">
                             <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
-                                <input type="checkbox" class="text-primary rounded" value="State Level" x-model="selected">
+                                <input type="radio" name="jurisdiction" class="text-primary" value="State Level" x-model="selected">
                                 <span class="text-sm text-gray-900">State Level</span>
                             </label>
                             <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
-                                <input type="checkbox" class="text-primary rounded" value="Counties" x-model="selected">
+                                <input type="radio" name="jurisdiction" class="text-primary" value="Counties" x-model="selected">
                                 <span class="text-sm text-gray-900">Counties</span>
                             </label>
                             <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
-                                <input type="checkbox" class="text-primary rounded" value="Congressional Districts" x-model="selected">
+                                <input type="radio" name="jurisdiction" class="text-primary" value="Congressional Districts" x-model="selected">
                                 <span class="text-sm text-gray-900">Congressional Districts</span>
                             </label>
                             <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
-                                <input type="checkbox" class="text-primary rounded" value="Cities" x-model="selected">
+                                <input type="radio" name="jurisdiction" class="text-primary" value="Cities" x-model="selected">
                                 <span class="text-sm text-gray-900">Cities</span>
                             </label>
                             <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
-                                <input type="checkbox" class="text-primary rounded" value="School Districts" x-model="selected">
+                                <input type="radio" name="jurisdiction" class="text-primary" value="School Districts" x-model="selected">
                                 <span class="text-sm text-gray-900">School Districts</span>
                             </label>
                         </div>
@@ -688,7 +711,7 @@
                     data: {
                         labels: ['Aug 23', 'Nov 23', 'Aug 24', 'Nov 24', 'Aug 25'],
                         datasets: [{
-                            data: [65, 72, 68, 76, null],
+                            data: [58, 65, 72, 68, 76, 0],
                             backgroundColor: '#2563eb',
                             borderRadius: {
                                 topLeft: 4,
@@ -1045,9 +1068,9 @@
         const turnoutChart = new Chart(turnoutCtx, {
             type: 'bar',
             data: {
-                labels: ['Aug 23', 'Nov 23', 'Aug 24', 'Nov 24', 'Aug 25'],
+                labels: ['Aug 23', 'Nov 23','Feb 24', 'Aug 24', 'Nov 24', 'Aug 25'],
                 datasets: [{
-                    data: [65, 72, 68, 76, null],
+                    data: [58, 65, 72, 68, 76, null],
                     backgroundColor: '#2563eb',
                     borderRadius: {
                         topLeft: 4,
