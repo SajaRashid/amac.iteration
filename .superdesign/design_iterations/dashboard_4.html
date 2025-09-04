@@ -308,7 +308,7 @@
                 <div class="dropdown-container" x-data="{ 
                     open: false,
                     selectedElection: 'Nov 2024',
-                    elections: ['Aug 2025', 'Nov 2024', 'Aug 2024', 'Nov 2023', 'Aug 2023', 'Feb 2023'],
+                    elections: ['Aug 2025', 'Nov 2024', 'Aug 2024', 'Nov 2023', 'Aug 2023', 'Feb 2024'],
                     updateElection(election) {
                         this.selectedElection = election;
                         // Update turnout data based on selected election
@@ -318,7 +318,7 @@
                             'Aug 2024': 68,
                             'Nov 2023': 72,
                             'Aug 2023': 65,
-                            'Feb 2023': 58
+                            'Feb 2024': 58
                         };
                         
                         // Update the turnout stat
@@ -326,7 +326,7 @@
                         
                         // Update chart to highlight selected election
                         if (window.turnoutChart) {
-                            const allElections = ['Feb 2023', 'Aug 2023', 'Nov 2023', 'Aug 2024', 'Nov 2024', 'Aug 2025'];
+                            const allElections = ['Feb 2024', 'Aug 2023', 'Nov 2023', 'Aug 2024', 'Nov 2024', 'Aug 2025'];
                             const data = allElections.map(e => turnoutData[e]);
                             window.turnoutChart.data.datasets[0].data = data;
                             window.turnoutChart.data.datasets[0].backgroundColor = data.map((d, i) => 
@@ -360,7 +360,7 @@
 
             <!-- Jurisdiction Type -->
             <div class="flex-1 bg-white rounded-lg shadow-sm p-2">
-                <h3 class="text-xs font-medium mb-1.5">Jurisdiction Type</h3>
+                <h3 class="text-xs font-medium mb-1.5">Jurisdiction</h3>
                 <div class="dropdown-container" 
                     x-data="{ 
                         open: false, 

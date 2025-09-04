@@ -284,7 +284,7 @@
         <header class="mb-8">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-6">
-                    <img src="/assets/amac-logo.png" alt="AMAC Logo" class="h-16 w-auto" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));" />
+                    <img src="../assets/amac-logo.png" alt="AMAC Logo" class="h-16 w-auto" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));" />
                     <div class="border-l border-gray-200 pl-6">
                         <h1 class="text-2xl font-bold">Voter Analytics</h1>
                         <p class="text-xs text-gray-400">Last updated: April 2024</p>
@@ -308,7 +308,7 @@
                 <div class="dropdown-container" x-data="{ 
                     open: false,
                     selectedElection: 'Nov 2024',
-                    elections: ['Aug 2025', 'Nov 2024', 'Aug 2024', 'Nov 2023', 'Aug 2023', 'Feb 2023'],
+                    elections: ['Aug 2025', 'Nov 2024', 'Aug 2024', 'Nov 2023', 'Aug 2023', 'Feb 2024'],
                     updateElection(election) {
                         this.selectedElection = election;
                         // Update turnout data based on selected election
@@ -318,7 +318,7 @@
                             'Aug 2024': 68,
                             'Nov 2023': 72,
                             'Aug 2023': 65,
-                            'Feb 2023': 58
+                            'Feb 2024': 58
                         };
                         
                         // Update the turnout stat
@@ -326,7 +326,7 @@
                         
                         // Update chart to highlight selected election
                         if (window.turnoutChart) {
-                            const allElections = ['Feb 2023', 'Aug 2023', 'Nov 2023', 'Aug 2024', 'Nov 2024', 'Aug 2025'];
+                            const allElections = ['Feb 2024', 'Aug 2023', 'Nov 2023', 'Aug 2024', 'Nov 2024', 'Aug 2025'];
                             const data = allElections.map(e => turnoutData[e]);
                             window.turnoutChart.data.datasets[0].data = data;
                             window.turnoutChart.data.datasets[0].backgroundColor = data.map((d, i) => 
