@@ -308,7 +308,7 @@
                 <div class="dropdown-container" x-data="{ 
                     open: false,
                     selectedElection: 'Nov 2024',
-                    elections: ['Aug 2025', 'Nov 2024', 'Aug 2024', 'Nov 2023', 'Aug 2023', 'Feb 2024'],
+                    elections: ['Aug 2025', 'Nov 2024', 'Aug 2024', 'Feb 2024', 'Nov 2023', 'Aug 2023'],
                     updateElection(election) {
                         this.selectedElection = election;
                         // Update turnout data based on selected election
@@ -326,7 +326,7 @@
                         
                         // Update chart to highlight selected election
                         if (window.turnoutChart) {
-                            const allElections = ['Feb 2024', 'Aug 2023', 'Nov 2023', 'Aug 2024', 'Nov 2024', 'Aug 2025'];
+                            const allElections = ['Aug 2025', 'Nov 2024', 'Aug 2024', 'Feb 2024', 'Nov 2023', 'Aug 2023'];
                             const data = allElections.map(e => turnoutData[e]);
                             window.turnoutChart.data.datasets[0].data = data;
                             window.turnoutChart.data.datasets[0].backgroundColor = data.map((d, i) => 
@@ -725,9 +725,9 @@
                 new Chart(turnoutCtx, {
                     type: 'bar',
                     data: {
-                        labels: ['Aug 23', 'Nov 23', 'Aug 24', 'Nov 24', 'Aug 25'],
+                        labels: ['Aug 25', 'Nov 24', 'Aug 24', 'Feb 24', 'Nov 23', 'Aug 23'],
                         datasets: [{
-                            data: [58, 65, 72, 68, 76, 0],
+                            data: [0, 76, 68, 58, 72, 65],
                             backgroundColor: '#2563eb',
                             borderRadius: {
                                 topLeft: 4,
@@ -1314,8 +1314,8 @@
         function filterDataByDateRange(startDate, endDate) {
             // This is a placeholder function - in reality, you would fetch data from your backend
             const allData = {
-                labels: ['Aug 23', 'Nov 23', 'Aug 24', 'Nov 24'],
-                data: [65, 72, 68, 76]
+                labels: ['Nov 24', 'Aug 24', 'Feb 24', 'Nov 23', 'Aug 23'],
+                data: [76, 68, 58, 72, 65]
             };
             
             // Filter data based on date range
