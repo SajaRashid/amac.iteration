@@ -726,47 +726,47 @@
                         <div class="space-y-4">
                             <div>
                                 <div class="flex flex-col sm:flex-row justify-between mb-2">
-                                    <span class="font-medium mb-1 sm:mb-0">King County</span>
-                            <span class="stat-value" data-stat="top-jurisdiction-0">89,450</span>
+                                    <span class="font-medium mb-1 sm:mb-0" data-top-label="0">King County</span>
+                                    <span class="stat-value" data-stat="top-jurisdiction-0">89,450</span>
                                 </div>
                                 <div class="progress-bar">
-                                    <div class="progress-bar-fill" style="width: 100%"></div>
+                                    <div class="progress-bar-fill" data-top-progress="0" style="width: 100%"></div>
                                 </div>
                             </div>
                             <div>
                                 <div class="flex flex-col sm:flex-row justify-between mb-2">
-                                    <span class="font-medium mb-1 sm:mb-0">7th Congressional District</span>
-                            <span class="stat-value" data-stat="top-jurisdiction-1">45,230</span>
+                                    <span class="font-medium mb-1 sm:mb-0" data-top-label="1">7th Congressional District</span>
+                                    <span class="stat-value" data-stat="top-jurisdiction-1">45,230</span>
                                 </div>
                                 <div class="progress-bar">
-                                    <div class="progress-bar-fill" style="width: 50%"></div>
+                                    <div class="progress-bar-fill" data-top-progress="1" style="width: 70%"></div>
                                 </div>
                             </div>
                             <div>
                                 <div class="flex flex-col sm:flex-row justify-between mb-2">
-                                    <span class="font-medium mb-1 sm:mb-0">Seattle</span>
-                            <span class="stat-value" data-stat="top-jurisdiction-2">32,180</span>
+                                    <span class="font-medium mb-1 sm:mb-0" data-top-label="2">Seattle</span>
+                                    <span class="stat-value" data-stat="top-jurisdiction-2">32,180</span>
                                 </div>
                                 <div class="progress-bar">
-                                    <div class="progress-bar-fill" style="width: 35%"></div>
+                                    <div class="progress-bar-fill" data-top-progress="2" style="width: 55%"></div>
                                 </div>
                             </div>
                             <div>
                                 <div class="flex flex-col sm:flex-row justify-between mb-2">
-                                    <span class="font-medium mb-1 sm:mb-0">Bellevue</span>
-                            <span class="stat-value" data-stat="top-jurisdiction-3">28,940</span>
+                                    <span class="font-medium mb-1 sm:mb-0" data-top-label="3">Bellevue</span>
+                                    <span class="stat-value" data-stat="top-jurisdiction-3">28,940</span>
                                 </div>
                                 <div class="progress-bar">
-                                    <div class="progress-bar-fill" style="width: 32%"></div>
+                                    <div class="progress-bar-fill" data-top-progress="3" style="width: 48%"></div>
                                 </div>
                             </div>
                             <div>
                                 <div class="flex flex-col sm:flex-row justify-between mb-2">
-                                    <span class="font-medium mb-1 sm:mb-0">Tacoma</span>
-                            <span class="stat-value" data-stat="top-jurisdiction-4">25,670</span>
+                                    <span class="font-medium mb-1 sm:mb-0" data-top-label="4">Tacoma</span>
+                                    <span class="stat-value" data-stat="top-jurisdiction-4">25,670</span>
                                 </div>
                                 <div class="progress-bar">
-                                    <div class="progress-bar-fill" style="width: 29%"></div>
+                                    <div class="progress-bar-fill" data-top-progress="4" style="width: 42%"></div>
                                 </div>
                             </div>
                         </div>
@@ -1238,50 +1238,1441 @@
         window.stateDatasets = {
             WA: {
                 Counties: {
-                title: 'County Turnout Overview',
+                    title: 'County Turnout Overview',
                     subtitle: 'Washington | November 2024',
-                legend: {
-                    range: '0-100%',
-                    gradient: turnoutLegendGradient
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#dc2626',
+                            55, '#f97316',
+                            65, '#facc15',
+                            75, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.85)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'King County', turnout: 76.0, registered: 89450, voted: 67982 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.60, 47.10, -121.60, 47.90) } },
+                            { type: 'Feature', properties: { name: 'Pierce County', turnout: 72.0, registered: 45230, voted: 32566 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.90, 46.70, -121.90, 47.30) } },
+                            { type: 'Feature', properties: { name: 'Spokane County', turnout: 68.4, registered: 35780, voted: 24473 }, geometry: { type: 'Polygon', coordinates: rectangle(-118.40, 47.30, -117.00, 48.00) } },
+                            { type: 'Feature', properties: { name: 'Clark County', turnout: 70.1, registered: 42560, voted: 29836 }, geometry: { type: 'Polygon', coordinates: rectangle(-123.15, 45.50, -122.10, 46.10) } },
+                            { type: 'Feature', properties: { name: 'Whatcom County', turnout: 71.4, registered: 25670, voted: 18326 }, geometry: { type: 'Polygon', coordinates: rectangle(-123.20, 48.50, -121.90, 49.10) } }
+                        ]
+                    },
+                    fitBounds: [[-123.5, 45.4], [-117.0, 49.2]]
                 },
-                tooltipKey: 'name',
-                tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
-                paint: {
-                    'fill-color': [
-                        'interpolate', ['linear'], ['get', 'turnout'],
-                        0, '#dc2626',
-                        55, '#f97316',
-                        65, '#facc15',
-                        75, '#22c55e',
-                        90, '#15803d'
-                    ],
-                    'fill-opacity': 0.78,
-                    'fill-outline-color': 'rgba(255,255,255,0.85)'
+                Cities: {
+                    title: 'City Turnout Comparison',
+                    subtitle: 'Washington urban centers',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#be123c',
+                            55, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            95, '#15803d'
+                        ],
+                        'fill-opacity': 0.8,
+                        'fill-outline-color': 'rgba(15,23,42,0.25)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Seattle', turnout: 81.0, registered: 43210, voted: 35000 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.45, 47.50, -122.18, 47.75) } },
+                            { type: 'Feature', properties: { name: 'Tacoma', turnout: 69.5, registered: 15280, voted: 10600 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.55, 47.18, -122.37, 47.35) } },
+                            { type: 'Feature', properties: { name: 'Spokane', turnout: 66.2, registered: 12890, voted: 8540 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.50, 47.60, -117.30, 47.75) } }
+                        ]
+                    },
+                    fitBounds: [[-123.2, 45.4], [-117.2, 48.9]]
                 },
-                data: {
-                    type: 'FeatureCollection',
-                    features: [
-                        { type: 'Feature', properties: { name: 'King County', turnout: 76.0, registered: 89450, voted: 67982 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.6, 47.1, -121.6, 47.9) } },
-                        { type: 'Feature', properties: { name: 'Pierce County', turnout: 72.0, registered: 45230, voted: 32566 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.9, 46.7, -121.9, 47.3) } },
-                        { type: 'Feature', properties: { name: 'Snohomish County', turnout: 74.2, registered: 72340, voted: 53631 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.5, 47.8, -121.5, 48.4) } },
-                        { type: 'Feature', properties: { name: 'Spokane County', turnout: 68.4, registered: 35780, voted: 24473 }, geometry: { type: 'Polygon', coordinates: rectangle(-118.2, 47.3, -117.0, 48.0) } },
-                        { type: 'Feature', properties: { name: 'Clark County', turnout: 70.1, registered: 42560, voted: 29836 }, geometry: { type: 'Polygon', coordinates: rectangle(-123.1, 45.5, -122.1, 46.1) } },
-                        { type: 'Feature', properties: { name: 'Thurston County', turnout: 69.3, registered: 28900, voted: 20010 }, geometry: { type: 'Polygon', coordinates: rectangle(-123.3, 46.6, -122.4, 47.1) } },
-                        { type: 'Feature', properties: { name: 'Whatcom County', turnout: 71.4, registered: 25670, voted: 18326 }, geometry: { type: 'Polygon', coordinates: rectangle(-123.1, 48.5, -121.9, 49.1) } },
-                        { type: 'Feature', properties: { name: 'Yakima County', turnout: 65.2, registered: 18450, voted: 12068 }, geometry: { type: 'Polygon', coordinates: rectangle(-121.3, 46.0, -120.1, 46.6) } },
-                        { type: 'Feature', properties: { name: 'Kitsap County', turnout: 73.3, registered: 31240, voted: 22901 }, geometry: { type: 'Polygon', coordinates: rectangle(-123.2, 47.4, -122.4, 47.8) } },
-                        { type: 'Feature', properties: { name: 'Benton County', turnout: 67.1, registered: 22890, voted: 15329 }, geometry: { type: 'Polygon', coordinates: rectangle(-119.9, 45.8, -118.9, 46.4) } }
-                    ]
+                'School Districts': {
+                    title: 'School District Turnout',
+                    subtitle: 'Community engagement across districts',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#991b1b',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Seattle Public Schools', turnout: 79.5, registered: 21200, voted: 16850 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.48, 47.45, -122.20, 47.75) } },
+                            { type: 'Feature', properties: { name: 'Tacoma School District', turnout: 61.4, registered: 9800, voted: 6017 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.54, 47.18, -122.36, 47.32) } },
+                            { type: 'Feature', properties: { name: 'Spokane School District', turnout: 63.8, registered: 11850, voted: 7560 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.54, 47.55, -117.32, 47.78) } }
+                        ]
+                    },
+                    fitBounds: [[-123.3, 45.8], [-117.2, 48.8]]
                 },
-                fitBounds: [[-123.3, 45.5], [-117.0, 49.1]]
+                'Legislative Districts': {
+                    title: 'State Legislative Turnout',
+                    subtitle: 'Washington state legislature districts',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'LD-36', turnout: 83.2, registered: 18200, voted: 15100 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.45, 47.60, -122.33, 47.70) } },
+                            { type: 'Feature', properties: { name: 'LD-11', turnout: 69.4, registered: 16400, voted: 11360 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.30, 47.43, -122.10, 47.60) } },
+                            { type: 'Feature', properties: { name: 'LD-04', turnout: 62.7, registered: 14320, voted: 8980 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.40, 47.55, -117.05, 47.85) } }
+                        ]
+                    },
+                    fitBounds: [[-123.0, 45.5], [-117.0, 48.9]]
+                },
+                'Congressional Districts': {
+                    title: 'Congressional Turnout',
+                    subtitle: 'Washington federal representation',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            50, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.8)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'WA-07', turnout: 82.4, registered: 19800, voted: 16300 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.52, 47.55, -122.25, 47.75) } },
+                            { type: 'Feature', properties: { name: 'WA-08', turnout: 68.9, registered: 21500, voted: 14840 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.20, 47.10, -121.20, 47.80) } },
+                            { type: 'Feature', properties: { name: 'WA-05', turnout: 64.1, registered: 18750, voted: 12000 }, geometry: { type: 'Polygon', coordinates: rectangle(-118.50, 46.90, -117.00, 48.20) } }
+                        ]
+                    },
+                    fitBounds: [[-123.3, 45.6], [-117.0, 48.3]]
+                }
+            },
+            CA: {
+                Counties: {
+                    title: 'County Turnout Overview',
+                    subtitle: 'California | November 2024',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#dc2626',
+                            55, '#f97316',
+                            65, '#facc15',
+                            75, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.85)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Los Angeles County', turnout: 65.2, registered: 452310, voted: 294000 }, geometry: { type: 'Polygon', coordinates: rectangle(-118.95, 33.60, -117.60, 34.80) } },
+                            { type: 'Feature', properties: { name: 'San Diego County', turnout: 72.3, registered: 187540, voted: 135400 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.60, 32.50, -116.00, 33.36) } },
+                            { type: 'Feature', properties: { name: 'Orange County', turnout: 69.8, registered: 165320, voted: 116000 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.95, 33.40, -117.50, 33.95) } },
+                            { type: 'Feature', properties: { name: 'Sacramento County', turnout: 70.1, registered: 90560, voted: 63500 }, geometry: { type: 'Polygon', coordinates: rectangle(-121.70, 38.20, -121.00, 38.90) } },
+                            { type: 'Feature', properties: { name: 'Santa Clara County', turnout: 74.6, registered: 141230, voted: 105000 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.20, 37.00, -121.20, 37.60) } }
+                        ]
+                    },
+                    fitBounds: [[-125.0, 32.0], [-113.0, 42.2]]
+                },
+                Cities: {
+                    title: 'City Turnout Comparison',
+                    subtitle: 'California urban centers',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#be123c',
+                            55, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            95, '#15803d'
+                        ],
+                        'fill-opacity': 0.8,
+                        'fill-outline-color': 'rgba(15,23,42,0.25)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Los Angeles', turnout: 66.0, registered: 312000, voted: 206000 }, geometry: { type: 'Polygon', coordinates: rectangle(-118.53, 33.90, -118.10, 34.20) } },
+                            { type: 'Feature', properties: { name: 'San Diego', turnout: 74.1, registered: 151200, voted: 112800 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.28, 32.60, -116.90, 32.95) } },
+                            { type: 'Feature', properties: { name: 'San Jose', turnout: 72.5, registered: 128400, voted: 93060 }, geometry: { type: 'Polygon', coordinates: rectangle(-121.95, 37.20, -121.70, 37.45) } },
+                            { type: 'Feature', properties: { name: 'San Francisco', turnout: 78.4, registered: 98650, voted: 77300 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.53, 37.70, -122.35, 37.83) } },
+                            { type: 'Feature', properties: { name: 'Sacramento', turnout: 71.3, registered: 76400, voted: 54400 }, geometry: { type: 'Polygon', coordinates: rectangle(-121.55, 38.45, -121.30, 38.70) } }
+                        ]
+                    },
+                    fitBounds: [[-123.5, 32.5], [-117.0, 39.5]]
+                },
+                'School Districts': {
+                    title: 'School District Turnout',
+                    subtitle: 'California education regions',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#991b1b',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'LA Unified', turnout: 64.4, registered: 280000, voted: 180000 }, geometry: { type: 'Polygon', coordinates: rectangle(-118.60, 33.90, -118.00, 34.30) } },
+                            { type: 'Feature', properties: { name: 'San Diego Unified', turnout: 69.8, registered: 120000, voted: 83800 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.25, 32.70, -116.90, 33.05) } },
+                            { type: 'Feature', properties: { name: 'San Francisco USD', turnout: 73.2, registered: 68000, voted: 49700 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.50, 37.72, -122.36, 37.83) } },
+                            { type: 'Feature', properties: { name: 'Sacramento City USD', turnout: 67.1, registered: 54000, voted: 36200 }, geometry: { type: 'Polygon', coordinates: rectangle(-121.55, 38.50, -121.30, 38.68) } }
+                        ]
+                    },
+                    fitBounds: [[-123.4, 32.6], [-117.5, 39.2]]
+                },
+                'Legislative Districts': {
+                    title: 'State Legislative Turnout',
+                    subtitle: 'California state representation',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'SD-11', turnout: 79.4, registered: 98650, voted: 78300 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.52, 37.70, -122.35, 37.85) } },
+                            { type: 'Feature', properties: { name: 'SD-39', turnout: 71.2, registered: 185300, voted: 131800 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.30, 32.75, -116.90, 33.15) } },
+                            { type: 'Feature', properties: { name: 'SD-13', turnout: 74.8, registered: 161200, voted: 120600 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.40, 37.20, -121.80, 37.70) } },
+                            { type: 'Feature', properties: { name: 'SD-06', turnout: 69.9, registered: 152400, voted: 106500 }, geometry: { type: 'Polygon', coordinates: rectangle(-121.70, 38.10, -120.80, 38.90) } }
+                        ]
+                    },
+                    fitBounds: [[-123.0, 32.5], [-117.0, 39.2]]
+                },
+                'Congressional Districts': {
+                    title: 'Congressional Turnout',
+                    subtitle: 'California federal representation',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            50, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.8)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'CA-12', turnout: 77.5, registered: 98650, voted: 76450 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.52, 37.70, -122.35, 37.85) } },
+                            { type: 'Feature', properties: { name: 'CA-52', turnout: 74.3, registered: 187540, voted: 139000 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.40, 32.60, -116.90, 33.25) } },
+                            { type: 'Feature', properties: { name: 'CA-45', turnout: 68.2, registered: 165320, voted: 112300 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.95, 33.40, -117.60, 33.85) } },
+                            { type: 'Feature', properties: { name: 'CA-07', turnout: 70.7, registered: 90560, voted: 64000 }, geometry: { type: 'Polygon', coordinates: rectangle(-121.60, 38.20, -120.90, 38.80) } }
+                        ]
+                    },
+                    fitBounds: [[-124.3, 32.5], [-117.0, 41.5]]
+                }
+            },
+            FL: {
+                Counties: {
+                    title: 'County Turnout Overview',
+                    subtitle: 'Florida | November 2024',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#dc2626',
+                            55, '#f97316',
+                            65, '#facc15',
+                            75, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.85)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Miami-Dade County', turnout: 62.4, registered: 402130, voted: 251700 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.90, 25.20, -80.10, 26.10) } },
+                            { type: 'Feature', properties: { name: 'Broward County', turnout: 64.7, registered: 271540, voted: 175700 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.60, 25.80, -80.00, 26.40) } },
+                            { type: 'Feature', properties: { name: 'Orange County', turnout: 68.2, registered: 183200, voted: 124600 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.60, 28.30, -80.80, 28.75) } },
+                            { type: 'Feature', properties: { name: 'Palm Beach County', turnout: 66.8, registered: 176450, voted: 117200 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.80, 26.30, -80.00, 27.10) } },
+                            { type: 'Feature', properties: { name: 'Hillsborough County', turnout: 67.5, registered: 169820, voted: 114800 }, geometry: { type: 'Polygon', coordinates: rectangle(-82.70, 27.60, -82.10, 28.20) } }
+                        ]
+                    },
+                    fitBounds: [[-88.5, 24.5], [-79.0, 31.2]]
+                },
+                Cities: {
+                    title: 'City Turnout Comparison',
+                    subtitle: 'Florida urban centers',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#be123c',
+                            55, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            95, '#15803d'
+                        ],
+                        'fill-opacity': 0.8,
+                        'fill-outline-color': 'rgba(15,23,42,0.25)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Miami', turnout: 63.4, registered: 180300, voted: 114800 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.25, 25.70, -80.10, 25.90) } },
+                            { type: 'Feature', properties: { name: 'Orlando', turnout: 69.9, registered: 102400, voted: 71580 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.45, 28.45, -81.25, 28.60) } },
+                            { type: 'Feature', properties: { name: 'Tampa', turnout: 68.2, registered: 96400, voted: 65700 }, geometry: { type: 'Polygon', coordinates: rectangle(-82.55, 27.85, -82.35, 28.00) } },
+                            { type: 'Feature', properties: { name: 'Jacksonville', turnout: 64.1, registered: 154200, voted: 98880 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.80, 30.20, -81.50, 30.45) } },
+                            { type: 'Feature', properties: { name: 'Tallahassee', turnout: 67.8, registered: 51200, voted: 34770 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.35, 30.40, -84.15, 30.55) } }
+                        ]
+                    },
+                    fitBounds: [[-82.6, 25.6], [-80.0, 30.6]]
+                },
+                'School Districts': {
+                    title: 'School District Turnout',
+                    subtitle: 'Florida education regions',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#991b1b',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Miami-Dade Public Schools', turnout: 62.8, registered: 290000, voted: 182500 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.85, 25.30, -80.10, 26.00) } },
+                            { type: 'Feature', properties: { name: 'Orange County Schools', turnout: 67.5, registered: 140000, voted: 94500 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.50, 28.30, -81.00, 28.70) } },
+                            { type: 'Feature', properties: { name: 'Hillsborough County Schools', turnout: 66.1, registered: 132000, voted: 87200 }, geometry: { type: 'Polygon', coordinates: rectangle(-82.60, 27.75, -82.20, 28.10) } },
+                            { type: 'Feature', properties: { name: 'Broward County Schools', turnout: 64.9, registered: 165000, voted: 107000 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.45, 26.00, -80.05, 26.40) } }
+                        ]
+                    },
+                    fitBounds: [[-82.7, 25.3], [-80.0, 30.2]]
+                },
+                'Legislative Districts': {
+                    title: 'State Legislative Turnout',
+                    subtitle: 'Florida state senate districts',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'SD-37', turnout: 64.3, registered: 190000, voted: 122000 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.40, 25.50, -80.05, 26.00) } },
+                            { type: 'Feature', properties: { name: 'SD-13', turnout: 67.9, registered: 178000, voted: 121000 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.35, 28.20, -80.95, 28.70) } },
+                            { type: 'Feature', properties: { name: 'SD-24', turnout: 69.1, registered: 165000, voted: 114000 }, geometry: { type: 'Polygon', coordinates: rectangle(-82.75, 27.60, -82.20, 28.15) } }
+                        ]
+                    },
+                    fitBounds: [[-82.8, 25.4], [-80.0, 30.0]]
+                },
+                'Congressional Districts': {
+                    title: 'Congressional Turnout',
+                    subtitle: 'Florida federal representation',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            50, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.8)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'FL-25', turnout: 65.1, registered: 420000, voted: 273000 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.70, 25.30, -80.20, 26.10) } },
+                            { type: 'Feature', properties: { name: 'FL-09', turnout: 67.8, registered: 315000, voted: 214000 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.45, 28.00, -81.00, 28.70) } },
+                            { type: 'Feature', properties: { name: 'FL-14', turnout: 69.2, registered: 290000, voted: 201000 }, geometry: { type: 'Polygon', coordinates: rectangle(-82.60, 27.80, -82.20, 28.25) } }
+                        ]
+                    },
+                    fitBounds: [[-82.7, 25.3], [-80.0, 30.2]]
+                }
+            },
+            OH: {
+                Counties: {
+                    title: 'County Turnout Overview',
+                    subtitle: 'Ohio | November 2024',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#dc2626',
+                            55, '#f97316',
+                            65, '#facc15',
+                            75, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.85)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Franklin County', turnout: 72.4, registered: 184560, voted: 133900 }, geometry: { type: 'Polygon', coordinates: rectangle(-83.30, 39.70, -82.70, 40.20) } },
+                            { type: 'Feature', properties: { name: 'Cuyahoga County', turnout: 68.9, registered: 163420, voted: 112650 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.90, 41.20, -81.10, 41.60) } },
+                            { type: 'Feature', properties: { name: 'Hamilton County', turnout: 70.5, registered: 122340, voted: 86140 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.80, 39.00, -84.20, 39.30) } },
+                            { type: 'Feature', properties: { name: 'Summit County', turnout: 69.6, registered: 90560, voted: 63080 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.80, 40.95, -81.30, 41.30) } },
+                            { type: 'Feature', properties: { name: 'Montgomery County', turnout: 67.8, registered: 75800, voted: 51330 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.45, 39.50, -83.90, 39.90) } }
+                        ]
+                    },
+                    fitBounds: [[-85.0, 38.8], [-80.5, 42.5]]
+                },
+                Cities: {
+                    title: 'City Turnout Comparison',
+                    subtitle: 'Ohio urban centers',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#be123c',
+                            55, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            95, '#15803d'
+                        ],
+                        'fill-opacity': 0.8,
+                        'fill-outline-color': 'rgba(15,23,42,0.25)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Columbus', turnout: 72.8, registered: 151200, voted: 110900 }, geometry: { type: 'Polygon', coordinates: rectangle(-83.25, 39.80, -82.75, 40.15) } },
+                            { type: 'Feature', properties: { name: 'Cleveland', turnout: 67.5, registered: 128900, voted: 87000 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.77, 41.42, -81.55, 41.60) } },
+                            { type: 'Feature', properties: { name: 'Cincinnati', turnout: 71.9, registered: 104500, voted: 75130 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.65, 39.05, -84.35, 39.22) } },
+                            { type: 'Feature', properties: { name: 'Toledo', turnout: 66.1, registered: 78500, voted: 51830 }, geometry: { type: 'Polygon', coordinates: rectangle(-83.67, 41.60, -83.45, 41.75) } },
+                            { type: 'Feature', properties: { name: 'Dayton', turnout: 70.5, registered: 60800, voted: 42860 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.27, 39.68, -84.05, 39.92) } }
+                        ]
+                    },
+                    fitBounds: [[-84.9, 38.6], [-81.1, 41.9]]
+                },
+                'School Districts': {
+                    title: 'School District Turnout',
+                    subtitle: 'Ohio education regions',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#991b1b',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Columbus City Schools', turnout: 71.2, registered: 118000, voted: 84000 }, geometry: { type: 'Polygon', coordinates: rectangle(-83.20, 39.85, -82.85, 40.12) } },
+                            { type: 'Feature', properties: { name: 'Cleveland Metro Schools', turnout: 66.5, registered: 96000, voted: 63800 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.75, 41.42, -81.55, 41.60) } },
+                            { type: 'Feature', properties: { name: 'Cincinnati Public Schools', turnout: 69.8, registered: 78000, voted: 54500 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.60, 39.07, -84.40, 39.20) } },
+                            { type: 'Feature', properties: { name: 'Toledo Public Schools', turnout: 65.2, registered: 62000, voted: 40400 }, geometry: { type: 'Polygon', coordinates: rectangle(-83.65, 41.58, -83.45, 41.72) } }
+                        ]
+                    },
+                    fitBounds: [[-84.8, 38.9], [-81.2, 41.8]]
+                },
+                'Legislative Districts': {
+                    title: 'State Legislative Turnout',
+                    subtitle: 'Ohio state senate districts',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'SD-03', turnout: 73.1, registered: 162000, voted: 118500 }, geometry: { type: 'Polygon', coordinates: rectangle(-83.20, 39.90, -82.80, 40.30) } },
+                            { type: 'Feature', properties: { name: 'SD-21', turnout: 68.4, registered: 154000, voted: 105400 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.85, 41.35, -81.50, 41.60) } },
+                            { type: 'Feature', properties: { name: 'SD-09', turnout: 70.2, registered: 128000, voted: 89800 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.55, 39.00, -84.20, 39.30) } }
+                        ]
+                    },
+                    fitBounds: [[-84.8, 38.9], [-81.2, 41.8]]
+                },
+                'Congressional Districts': {
+                    title: 'Congressional Turnout',
+                    subtitle: 'Ohio federal representation',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            50, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.8)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'OH-03', turnout: 73.1, registered: 162000, voted: 118500 }, geometry: { type: 'Polygon', coordinates: rectangle(-83.20, 39.90, -82.80, 40.30) } },
+                            { type: 'Feature', properties: { name: 'OH-13', turnout: 68.4, registered: 154000, voted: 105400 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.85, 41.35, -81.50, 41.60) } },
+                            { type: 'Feature', properties: { name: 'OH-06', turnout: 70.2, registered: 128000, voted: 89800 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.55, 39.00, -84.20, 39.30) } }
+                        ]
+                    },
+                    fitBounds: [[-84.8, 38.9], [-81.2, 41.8]]
+                }
+            },
+            DC: {
+                Wards: {
+                    title: 'Ward Turnout Overview',
+                    subtitle: 'District of Columbia wards',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#dc2626',
+                            55, '#f97316',
+                            65, '#facc15',
+                            75, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.85)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Ward 1', turnout: 80.4, registered: 8400, voted: 6750 }, geometry: { type: 'Polygon', coordinates: rectangle(-77.04, 38.90, -77.02, 38.94) } },
+                            { type: 'Feature', properties: { name: 'Ward 2', turnout: 82.7, registered: 11230, voted: 9290 }, geometry: { type: 'Polygon', coordinates: rectangle(-77.06, 38.89, -77.03, 38.92) } },
+                            { type: 'Feature', properties: { name: 'Ward 3', turnout: 83.9, registered: 12840, voted: 10780 }, geometry: { type: 'Polygon', coordinates: rectangle(-77.11, 38.93, -77.05, 39.00) } },
+                            { type: 'Feature', properties: { name: 'Ward 4', turnout: 81.2, registered: 7370, voted: 5985 }, geometry: { type: 'Polygon', coordinates: rectangle(-77.04, 38.95, -77.00, 39.00) } },
+                            { type: 'Feature', properties: { name: 'Ward 5', turnout: 79.5, registered: 6820, voted: 5420 }, geometry: { type: 'Polygon', coordinates: rectangle(-76.99, 38.90, -76.95, 38.95) } },
+                            { type: 'Feature', properties: { name: 'Ward 6', turnout: 82.1, registered: 10520, voted: 8630 }, geometry: { type: 'Polygon', coordinates: rectangle(-77.02, 38.86, -76.97, 38.90) } },
+                            { type: 'Feature', properties: { name: 'Ward 7', turnout: 78.6, registered: 9230, voted: 7250 }, geometry: { type: 'Polygon', coordinates: rectangle(-76.98, 38.87, -76.94, 38.92) } },
+                            { type: 'Feature', properties: { name: 'Ward 8', turnout: 76.9, registered: 8370, voted: 6435 }, geometry: { type: 'Polygon', coordinates: rectangle(-77.01, 38.84, -76.96, 38.88) } }
+                        ]
+                    },
+                    fitBounds: [[-77.2, 38.83], [-76.9, 39.01]]
                 }
             }
         };
+
+        window.stateDatasets = {
+            WA: {
+                Counties: {
+                    title: 'County Turnout Overview',
+                    subtitle: 'Washington | November 2024',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#dc2626',
+                            55, '#f97316',
+                            65, '#facc15',
+                            75, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.85)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'King County', turnout: 76.0, registered: 89450, voted: 67982 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.60, 47.10, -121.60, 47.90) } },
+                            { type: 'Feature', properties: { name: 'Pierce County', turnout: 72.0, registered: 45230, voted: 32566 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.90, 46.70, -121.90, 47.30) } },
+                            { type: 'Feature', properties: { name: 'Spokane County', turnout: 68.4, registered: 35780, voted: 24473 }, geometry: { type: 'Polygon', coordinates: rectangle(-118.40, 47.30, -117.00, 48.00) } },
+                            { type: 'Feature', properties: { name: 'Clark County', turnout: 70.1, registered: 42560, voted: 29836 }, geometry: { type: 'Polygon', coordinates: rectangle(-123.15, 45.50, -122.10, 46.10) } },
+                            { type: 'Feature', properties: { name: 'Whatcom County', turnout: 71.4, registered: 25670, voted: 18326 }, geometry: { type: 'Polygon', coordinates: rectangle(-123.20, 48.50, -121.90, 49.10) } }
+                        ]
+                    },
+                    fitBounds: [[-123.5, 45.4], [-117.0, 49.2]]
+                },
+                Cities: {
+                    title: 'City Turnout Comparison',
+                    subtitle: 'Washington urban centers',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#be123c',
+                            55, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            95, '#15803d'
+                        ],
+                        'fill-opacity': 0.8,
+                        'fill-outline-color': 'rgba(15,23,42,0.25)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Seattle', turnout: 81.0, registered: 43210, voted: 35000 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.45, 47.50, -122.18, 47.75) } },
+                            { type: 'Feature', properties: { name: 'Tacoma', turnout: 69.5, registered: 15280, voted: 10600 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.55, 47.18, -122.37, 47.35) } },
+                            { type: 'Feature', properties: { name: 'Spokane', turnout: 66.2, registered: 12890, voted: 8540 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.50, 47.60, -117.30, 47.75) } }
+                        ]
+                    },
+                    fitBounds: [[-123.2, 45.4], [-117.2, 48.9]]
+                },
+                'School Districts': {
+                    title: 'School District Turnout',
+                    subtitle: 'Community engagement across districts',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#991b1b',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Seattle Public Schools', turnout: 79.5, registered: 21200, voted: 16850 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.48, 47.45, -122.20, 47.75) } },
+                            { type: 'Feature', properties: { name: 'Tacoma School District', turnout: 61.4, registered: 9800, voted: 6017 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.54, 47.18, -122.36, 47.32) } },
+                            { type: 'Feature', properties: { name: 'Spokane School District', turnout: 63.8, registered: 11850, voted: 7560 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.54, 47.55, -117.32, 47.78) } }
+                        ]
+                    },
+                    fitBounds: [[-123.3, 45.8], [-117.2, 48.8]]
+                },
+                'Legislative Districts': {
+                    title: 'State Legislative Turnout',
+                    subtitle: 'Washington state legislature districts',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'LD-36', turnout: 83.2, registered: 18200, voted: 15100 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.45, 47.60, -122.33, 47.70) } },
+                            { type: 'Feature', properties: { name: 'LD-11', turnout: 69.4, registered: 16400, voted: 11360 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.30, 47.43, -122.10, 47.60) } },
+                            { type: 'Feature', properties: { name: 'LD-04', turnout: 62.7, registered: 14320, voted: 8980 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.40, 47.55, -117.05, 47.85) } }
+                        ]
+                    },
+                    fitBounds: [[-123.0, 45.5], [-117.0, 48.9]]
+                },
+                'Congressional Districts': {
+                    title: 'Congressional Turnout',
+                    subtitle: 'Washington federal representation',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            50, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.8)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'WA-07', turnout: 82.4, registered: 19800, voted: 16300 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.52, 47.55, -122.25, 47.75) } },
+                            { type: 'Feature', properties: { name: 'WA-08', turnout: 68.9, registered: 21500, voted: 14840 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.20, 47.10, -121.20, 47.80) } },
+                            { type: 'Feature', properties: { name: 'WA-05', turnout: 64.1, registered: 18750, voted: 12000 }, geometry: { type: 'Polygon', coordinates: rectangle(-118.50, 46.90, -117.00, 48.20) } }
+                        ]
+                    },
+                    fitBounds: [[-123.3, 45.6], [-117.0, 48.3]]
+                }
+            },
+            CA: {
+                Counties: {
+                    title: 'County Turnout Overview',
+                    subtitle: 'California | November 2024',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#dc2626',
+                            55, '#f97316',
+                            65, '#facc15',
+                            75, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.85)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Los Angeles County', turnout: 65.2, registered: 452310, voted: 294000 }, geometry: { type: 'Polygon', coordinates: rectangle(-118.95, 33.60, -117.60, 34.80) } },
+                            { type: 'Feature', properties: { name: 'San Diego County', turnout: 72.3, registered: 187540, voted: 135400 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.60, 32.50, -116.00, 33.36) } },
+                            { type: 'Feature', properties: { name: 'Orange County', turnout: 69.8, registered: 165320, voted: 116000 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.95, 33.40, -117.50, 33.95) } },
+                            { type: 'Feature', properties: { name: 'Sacramento County', turnout: 70.1, registered: 90560, voted: 63500 }, geometry: { type: 'Polygon', coordinates: rectangle(-121.70, 38.20, -121.00, 38.90) } },
+                            { type: 'Feature', properties: { name: 'Santa Clara County', turnout: 74.6, registered: 141230, voted: 105000 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.20, 37.00, -121.20, 37.60) } }
+                        ]
+                    },
+                    fitBounds: [[-125.0, 32.0], [-113.0, 42.2]]
+                },
+                Cities: {
+                    title: 'City Turnout Comparison',
+                    subtitle: 'California urban centers',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#be123c',
+                            55, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            95, '#15803d'
+                        ],
+                        'fill-opacity': 0.8,
+                        'fill-outline-color': 'rgba(15,23,42,0.25)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Los Angeles', turnout: 66.0, registered: 312000, voted: 206000 }, geometry: { type: 'Polygon', coordinates: rectangle(-118.53, 33.90, -118.10, 34.20) } },
+                            { type: 'Feature', properties: { name: 'San Diego', turnout: 74.1, registered: 151200, voted: 112800 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.28, 32.60, -116.90, 32.95) } },
+                            { type: 'Feature', properties: { name: 'San Jose', turnout: 72.5, registered: 128400, voted: 93060 }, geometry: { type: 'Polygon', coordinates: rectangle(-121.95, 37.20, -121.70, 37.45) } },
+                            { type: 'Feature', properties: { name: 'San Francisco', turnout: 78.4, registered: 98650, voted: 77300 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.53, 37.70, -122.35, 37.83) } },
+                            { type: 'Feature', properties: { name: 'Sacramento', turnout: 71.3, registered: 76400, voted: 54400 }, geometry: { type: 'Polygon', coordinates: rectangle(-121.55, 38.45, -121.30, 38.70) } }
+                        ]
+                    },
+                    fitBounds: [[-123.5, 32.5], [-117.0, 39.5]]
+                },
+                'School Districts': {
+                    title: 'School District Turnout',
+                    subtitle: 'California education regions',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#991b1b',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'LA Unified', turnout: 64.4, registered: 280000, voted: 180000 }, geometry: { type: 'Polygon', coordinates: rectangle(-118.60, 33.90, -118.00, 34.30) } },
+                            { type: 'Feature', properties: { name: 'San Diego Unified', turnout: 69.8, registered: 120000, voted: 83800 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.25, 32.70, -116.90, 33.05) } },
+                            { type: 'Feature', properties: { name: 'San Francisco USD', turnout: 73.2, registered: 68000, voted: 49700 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.50, 37.72, -122.36, 37.83) } },
+                            { type: 'Feature', properties: { name: 'Sacramento City USD', turnout: 67.1, registered: 54000, voted: 36200 }, geometry: { type: 'Polygon', coordinates: rectangle(-121.55, 38.50, -121.30, 38.68) } }
+                        ]
+                    },
+                    fitBounds: [[-123.4, 32.6], [-117.5, 39.2]]
+                },
+                'Legislative Districts': {
+                    title: 'State Legislative Turnout',
+                    subtitle: 'California state representation',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'SD-11', turnout: 79.4, registered: 98650, voted: 78300 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.52, 37.70, -122.35, 37.85) } },
+                            { type: 'Feature', properties: { name: 'SD-39', turnout: 71.2, registered: 185300, voted: 131800 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.30, 32.75, -116.90, 33.15) } },
+                            { type: 'Feature', properties: { name: 'SD-13', turnout: 74.8, registered: 161200, voted: 120600 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.40, 37.20, -121.80, 37.70) } },
+                            { type: 'Feature', properties: { name: 'SD-06', turnout: 69.9, registered: 152400, voted: 106500 }, geometry: { type: 'Polygon', coordinates: rectangle(-121.70, 38.10, -120.80, 38.90) } }
+                        ]
+                    },
+                    fitBounds: [[-123.0, 32.5], [-117.0, 39.2]]
+                },
+                'Congressional Districts': {
+                    title: 'Congressional Turnout',
+                    subtitle: 'California federal representation',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            50, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.8)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'CA-12', turnout: 77.5, registered: 98650, voted: 76450 }, geometry: { type: 'Polygon', coordinates: rectangle(-122.52, 37.70, -122.35, 37.85) } },
+                            { type: 'Feature', properties: { name: 'CA-52', turnout: 74.3, registered: 187540, voted: 139000 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.40, 32.60, -116.90, 33.25) } },
+                            { type: 'Feature', properties: { name: 'CA-45', turnout: 68.2, registered: 165320, voted: 112300 }, geometry: { type: 'Polygon', coordinates: rectangle(-117.95, 33.40, -117.60, 33.85) } },
+                            { type: 'Feature', properties: { name: 'CA-07', turnout: 70.7, registered: 90560, voted: 64000 }, geometry: { type: 'Polygon', coordinates: rectangle(-121.60, 38.20, -120.90, 38.80) } }
+                        ]
+                    },
+                    fitBounds: [[-124.3, 32.5], [-117.0, 41.5]]
+                }
+            },
+            FL: {
+                Counties: {
+                    title: 'County Turnout Overview',
+                    subtitle: 'Florida | November 2024',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#dc2626',
+                            55, '#f97316',
+                            65, '#facc15',
+                            75, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.85)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Miami-Dade County', turnout: 62.4, registered: 402130, voted: 251700 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.90, 25.20, -80.10, 26.10) } },
+                            { type: 'Feature', properties: { name: 'Broward County', turnout: 64.7, registered: 271540, voted: 175700 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.60, 25.80, -80.00, 26.40) } },
+                            { type: 'Feature', properties: { name: 'Orange County', turnout: 68.2, registered: 183200, voted: 124600 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.60, 28.30, -80.80, 28.75) } },
+                            { type: 'Feature', properties: { name: 'Palm Beach County', turnout: 66.8, registered: 176450, voted: 117200 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.80, 26.30, -80.00, 27.10) } },
+                            { type: 'Feature', properties: { name: 'Hillsborough County', turnout: 67.5, registered: 169820, voted: 114800 }, geometry: { type: 'Polygon', coordinates: rectangle(-82.70, 27.60, -82.10, 28.20) } }
+                        ]
+                    },
+                    fitBounds: [[-88.5, 24.5], [-79.0, 31.2]]
+                },
+                Cities: {
+                    title: 'City Turnout Comparison',
+                    subtitle: 'Florida urban centers',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#be123c',
+                            55, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            95, '#15803d'
+                        ],
+                        'fill-opacity': 0.8,
+                        'fill-outline-color': 'rgba(15,23,42,0.25)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Miami', turnout: 63.4, registered: 180300, voted: 114800 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.25, 25.70, -80.10, 25.90) } },
+                            { type: 'Feature', properties: { name: 'Orlando', turnout: 69.9, registered: 102400, voted: 71580 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.45, 28.45, -81.25, 28.60) } },
+                            { type: 'Feature', properties: { name: 'Tampa', turnout: 68.2, registered: 96400, voted: 65700 }, geometry: { type: 'Polygon', coordinates: rectangle(-82.55, 27.85, -82.35, 28.00) } },
+                            { type: 'Feature', properties: { name: 'Jacksonville', turnout: 64.1, registered: 154200, voted: 98880 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.80, 30.20, -81.50, 30.45) } },
+                            { type: 'Feature', properties: { name: 'Tallahassee', turnout: 67.8, registered: 51200, voted: 34770 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.35, 30.40, -84.15, 30.55) } }
+                        ]
+                    },
+                    fitBounds: [[-82.6, 25.6], [-80.0, 30.6]]
+                },
+                'School Districts': {
+                    title: 'School District Turnout',
+                    subtitle: 'Florida education regions',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#991b1b',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Miami-Dade Public Schools', turnout: 62.8, registered: 290000, voted: 182500 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.85, 25.30, -80.10, 26.00) } },
+                            { type: 'Feature', properties: { name: 'Orange County Schools', turnout: 67.5, registered: 140000, voted: 94500 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.50, 28.30, -81.00, 28.70) } },
+                            { type: 'Feature', properties: { name: 'Hillsborough County Schools', turnout: 66.1, registered: 132000, voted: 87200 }, geometry: { type: 'Polygon', coordinates: rectangle(-82.60, 27.75, -82.20, 28.10) } },
+                            { type: 'Feature', properties: { name: 'Broward County Schools', turnout: 64.9, registered: 165000, voted: 107000 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.45, 26.00, -80.05, 26.40) } }
+                        ]
+                    },
+                    fitBounds: [[-82.7, 25.3], [-80.0, 30.2]]
+                },
+                'Legislative Districts': {
+                    title: 'State Legislative Turnout',
+                    subtitle: 'Florida state senate districts',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'SD-37', turnout: 64.3, registered: 190000, voted: 122000 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.40, 25.50, -80.05, 26.00) } },
+                            { type: 'Feature', properties: { name: 'SD-13', turnout: 67.9, registered: 178000, voted: 121000 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.35, 28.20, -80.95, 28.70) } },
+                            { type: 'Feature', properties: { name: 'SD-24', turnout: 69.1, registered: 165000, voted: 114000 }, geometry: { type: 'Polygon', coordinates: rectangle(-82.75, 27.60, -82.20, 28.15) } }
+                        ]
+                    },
+                    fitBounds: [[-82.8, 25.4], [-80.0, 30.0]]
+                },
+                'Congressional Districts': {
+                    title: 'Congressional Turnout',
+                    subtitle: 'Florida federal representation',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            50, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.8)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'FL-25', turnout: 65.1, registered: 420000, voted: 273000 }, geometry: { type: 'Polygon', coordinates: rectangle(-80.70, 25.30, -80.20, 26.10) } },
+                            { type: 'Feature', properties: { name: 'FL-09', turnout: 67.8, registered: 315000, voted: 214000 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.45, 28.00, -81.00, 28.70) } },
+                            { type: 'Feature', properties: { name: 'FL-14', turnout: 69.2, registered: 290000, voted: 201000 }, geometry: { type: 'Polygon', coordinates: rectangle(-82.60, 27.80, -82.20, 28.25) } }
+                        ]
+                    },
+                    fitBounds: [[-82.7, 25.3], [-80.0, 30.2]]
+                }
+            },
+            OH: {
+                Counties: {
+                    title: 'County Turnout Overview',
+                    subtitle: 'Ohio | November 2024',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#dc2626',
+                            55, '#f97316',
+                            65, '#facc15',
+                            75, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.85)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Franklin County', turnout: 72.4, registered: 184560, voted: 133900 }, geometry: { type: 'Polygon', coordinates: rectangle(-83.30, 39.70, -82.70, 40.20) } },
+                            { type: 'Feature', properties: { name: 'Cuyahoga County', turnout: 68.9, registered: 163420, voted: 112650 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.90, 41.20, -81.10, 41.60) } },
+                            { type: 'Feature', properties: { name: 'Hamilton County', turnout: 70.5, registered: 122340, voted: 86140 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.80, 39.00, -84.20, 39.30) } },
+                            { type: 'Feature', properties: { name: 'Summit County', turnout: 69.6, registered: 90560, voted: 63080 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.80, 40.95, -81.30, 41.30) } },
+                            { type: 'Feature', properties: { name: 'Montgomery County', turnout: 67.8, registered: 75800, voted: 51330 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.45, 39.50, -83.90, 39.90) } }
+                        ]
+                    },
+                    fitBounds: [[-85.0, 38.8], [-80.5, 42.5]]
+                },
+                Cities: {
+                    title: 'City Turnout Comparison',
+                    subtitle: 'Ohio urban centers',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#be123c',
+                            55, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            95, '#15803d'
+                        ],
+                        'fill-opacity': 0.8,
+                        'fill-outline-color': 'rgba(15,23,42,0.25)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Columbus', turnout: 72.8, registered: 151200, voted: 110900 }, geometry: { type: 'Polygon', coordinates: rectangle(-83.25, 39.80, -82.75, 40.15) } },
+                            { type: 'Feature', properties: { name: 'Cleveland', turnout: 67.5, registered: 128900, voted: 87000 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.77, 41.42, -81.55, 41.60) } },
+                            { type: 'Feature', properties: { name: 'Cincinnati', turnout: 71.9, registered: 104500, voted: 75130 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.65, 39.05, -84.35, 39.22) } },
+                            { type: 'Feature', properties: { name: 'Toledo', turnout: 66.1, registered: 78500, voted: 51830 }, geometry: { type: 'Polygon', coordinates: rectangle(-83.67, 41.60, -83.45, 41.75) } },
+                            { type: 'Feature', properties: { name: 'Dayton', turnout: 70.5, registered: 60800, voted: 42860 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.27, 39.68, -84.05, 39.92) } }
+                        ]
+                    },
+                    fitBounds: [[-84.9, 38.6], [-81.1, 41.9]]
+                },
+                'School Districts': {
+                    title: 'School District Turnout',
+                    subtitle: 'Ohio education regions',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#991b1b',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'Columbus City Schools', turnout: 71.2, registered: 118000, voted: 84000 }, geometry: { type: 'Polygon', coordinates: rectangle(-83.20, 39.85, -82.85, 40.12) } },
+                            { type: 'Feature', properties: { name: 'Cleveland Metro Schools', turnout: 66.5, registered: 96000, voted: 63800 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.75, 41.42, -81.55, 41.60) } },
+                            { type: 'Feature', properties: { name: 'Cincinnati Public Schools', turnout: 69.8, registered: 78000, voted: 54500 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.60, 39.07, -84.40, 39.20) } },
+                            { type: 'Feature', properties: { name: 'Toledo Public Schools', turnout: 65.2, registered: 62000, voted: 40400 }, geometry: { type: 'Polygon', coordinates: rectangle(-83.65, 41.58, -83.45, 41.72) } }
+                        ]
+                    },
+                    fitBounds: [[-84.8, 38.9], [-81.2, 41.8]]
+                },
+                'Legislative Districts': {
+                    title: 'State Legislative Turnout',
+                    subtitle: 'Ohio state senate districts',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            45, '#f97316',
+                            60, '#facc15',
+                            75, '#16a34a',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.75)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'SD-03', turnout: 73.1, registered: 162000, voted: 118500 }, geometry: { type: 'Polygon', coordinates: rectangle(-83.20, 39.90, -82.80, 40.30) } },
+                            { type: 'Feature', properties: { name: 'SD-21', turnout: 68.4, registered: 154000, voted: 105400 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.85, 41.35, -81.50, 41.60) } },
+                            { type: 'Feature', properties: { name: 'SD-09', turnout: 70.2, registered: 128000, voted: 89800 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.55, 39.00, -84.20, 39.30) } }
+                        ]
+                    },
+                    fitBounds: [[-84.8, 38.9], [-81.2, 41.8]]
+                },
+                'Congressional Districts': {
+                    title: 'Congressional Turnout',
+                    subtitle: 'Ohio federal representation',
+                    legend: {
+                        range: '0-100%',
+                        gradient: turnoutLegendGradient
+                    },
+                    tooltipKey: 'name',
+                    tooltipTemplate: (props) => buildTooltip(props, 'Turnout'),
+                    paint: {
+                        'fill-color': [
+                            'interpolate', ['linear'], ['get', 'turnout'],
+                            0, '#7f1d1d',
+                            50, '#f97316',
+                            65, '#facc15',
+                            80, '#22c55e',
+                            90, '#15803d'
+                        ],
+                        'fill-opacity': 0.78,
+                        'fill-outline-color': 'rgba(255,255,255,0.8)'
+                    },
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', properties: { name: 'OH-03', turnout: 73.1, registered: 162000, voted: 118500 }, geometry: { type: 'Polygon', coordinates: rectangle(-83.20, 39.90, -82.80, 40.30) } },
+                            { type: 'Feature', properties: { name: 'OH-13', turnout: 68.4, registered: 154000, voted: 105400 }, geometry: { type: 'Polygon', coordinates: rectangle(-81.85, 41.35, -81.50, 41.60) } },
+                            { type: 'Feature', properties: { name: 'OH-06', turnout: 70.2, registered: 128000, voted: 89800 }, geometry: { type: 'Polygon', coordinates: rectangle(-84.55, 39.00, -84.20, 39.30) } }
+                        ]
+                    },
+                    fitBounds: [[-84.8, 38.9], [-81.2, 41.8]]
+                }
+            },
+            DC: {
+                label: 'Washington, D.C.',
+                abbr: 'DC',
+                center: [-77.036871, 38.907192],
+                zoom: 10,
+                bounds: [[-77.2, 38.8], [-76.9, 39.1]],
+                stats: {
+                    registeredTotal: 50340,
+                    turnoutAverage: 82,
+                    newRegistrations: 1240,
+                    activeAreas: 8,
+                    topJurisdictions: [
+                        { label: 'Ward 3', value: 12840 },
+                        { label: 'Ward 2', value: 11230 },
+                        { label: 'Ward 6', value: 10520 },
+                        { label: 'Ward 1', value: 8400 },
+                        { label: 'Ward 4', value: 7370 }
+                    ]
+                }
+            }
+        };
+
         window.currentStateKey = window.defaultStateKey;
         window.choroplethDatasets = window.stateDatasets[window.currentStateKey];
         window.currentDatasetKey = 'Counties';
         window.choroplethMapInstance = null;
         window.expandedMapInstance = null;
+
+        window.updateStateStats = (stateKey) => {
+            const config = window.stateConfigs[stateKey];
+            if (!config?.stats) return;
+
+            const { registeredTotal, turnoutAverage, newRegistrations, activeAreas, topJurisdictions } = config.stats;
+
+            const registeredEl = document.querySelector('[data-stat="registered-total"]');
+            if (registeredEl) registeredEl.textContent = registeredTotal.toLocaleString();
+
+            const turnoutEl = document.querySelector('[data-stat="turnout-average"]');
+            if (turnoutEl) turnoutEl.textContent = `${turnoutAverage}%`;
+
+            const newRegEl = document.querySelector('[data-stat="new-registrations"]');
+            if (newRegEl) newRegEl.textContent = newRegistrations.toLocaleString();
+
+            const activeAreasEl = document.querySelector('[data-stat="active-areas"]');
+            if (activeAreasEl) activeAreasEl.textContent = activeAreas.toLocaleString();
+
+            if (Array.isArray(topJurisdictions)) {
+                const maxValue = topJurisdictions[0]?.value || 1;
+                topJurisdictions.forEach(({ label, value }, index) => {
+                    const valueEl = document.querySelector(`[data-stat="top-jurisdiction-${index}"]`);
+                    if (valueEl) valueEl.textContent = value.toLocaleString();
+
+                    const labelEl = document.querySelector(`[data-top-label="${index}"]`);
+                    if (labelEl) labelEl.textContent = label;
+
+                    const progressEl = document.querySelector(`[data-top-progress="${index}"]`);
+                    if (progressEl) {
+                        const pct = Math.max(10, Math.round((value / maxValue) * 100));
+                        progressEl.style.width = `${Math.min(pct, 100)}%`;
+                    }
+                });
+            }
+        };
+
+        window.updateStateMap = (stateKey) => {
+            const stateData = window.stateDatasets[stateKey];
+            if (!stateData) return;
+
+            window.choroplethDatasets = stateData;
+
+            if (window.currentDatasetKey && stateData[window.currentDatasetKey]) {
+                if (window.updateChoroplethView) {
+                    window.updateChoroplethView(window.currentDatasetKey);
+                }
+            } else if (window.updateChoroplethView) {
+                window.updateChoroplethView('Counties');
+            }
+
+            const config = window.stateConfigs[stateKey];
+            if (config?.bounds) {
+                [window.choroplethMapInstance, window.expandedMapInstance]
+                    .filter(Boolean)
+                    .forEach(map => {
+                        try {
+                            map.fitBounds(config.bounds, { padding: 30, maxZoom: 8 });
+                        } catch (error) {
+                            console.warn('Failed to update map bounds', error);
+                        }
+                    });
+            } else if (config?.center) {
+                [window.choroplethMapInstance, window.expandedMapInstance]
+                    .filter(Boolean)
+                    .forEach(map => {
+                        try {
+                            map.setCenter(config.center);
+                            if (config.zoom) map.setZoom(config.zoom);
+                        } catch (error) {
+                            console.warn('Failed to update map center', error);
+                        }
+                    });
+            }
+        };
 
         document.addEventListener('alpine:init', () => {
             Alpine.store('mapModal', {
@@ -1415,6 +2806,41 @@
                     if (this.expandedMap) {
                         this.loadDataset(this.expandedMap, key);
                     }
+                }
+            }));
+
+            Alpine.data('stateSelector', () => ({
+                open: false,
+                selectedKey: window.currentStateKey,
+                get selectedLabel() {
+                    return window.stateConfigs[this.selectedKey]?.label || 'Select state';
+                },
+                states: Object.entries(window.stateConfigs).map(([key, config]) => ({
+                    key,
+                    label: config.label,
+                    abbr: config.abbr
+                })),
+                init() {
+                    window.updateStateStats(this.selectedKey);
+                    window.updateStateMap(this.selectedKey);
+                },
+                toggle() {
+                    this.open = !this.open;
+                },
+                close() {
+                    this.open = false;
+                },
+                selectState(stateKey) {
+                    if (this.selectedKey === stateKey) {
+                        this.close();
+                        return;
+                    }
+
+                    this.selectedKey = stateKey;
+                    window.currentStateKey = stateKey;
+                    window.updateStateStats(stateKey);
+                    window.updateStateMap(stateKey);
+                    this.close();
                 }
             }));
         })
