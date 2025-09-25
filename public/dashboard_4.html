@@ -691,7 +691,7 @@
                         }
                     }">
                         <div class="flex items-center justify-between mb-6">
-                            <h3 class="font-medium">Voter Turnout by Country of Origin</h3>
+                            <h3 class="font-medium">Voter Turnout by Country of Origin (option 1)</h3>
                             <div class="flex items-center gap-3">
                                 <button 
                                     @click="view = 'grid'" 
@@ -763,6 +763,127 @@
                             </template>
                         </div>
                     </div>
+
+                    <!-- New Bar Graph Widget -->
+                    <div class="lg:col-span-6 card p-4" 
+                         x-data="turnoutChart()"
+                         x-init="initChart()">
+                        <script>
+                            document.addEventListener('alpine:init', () => {
+                                Alpine.data('turnoutChart', () => ({
+                                    countries: [
+                                        { name: 'Morocco', turnout: 100.0, total: 18 },
+                                        { name: 'Kashmir', turnout: 88.9, total: 20 },
+                                        { name: 'India', turnout: 82.3, total: 214 },
+                                        { name: 'Egypt', turnout: 80.0, total: 116 },
+                                        { name: 'American', turnout: 74.9, total: 892 },
+                                        { name: 'Turkey', turnout: 69.0, total: 3716 },
+                                        { name: 'Bosnia and Herzegovina', turnout: 68.9, total: 5678 },
+                                        { name: 'Palestine', turnout: 68.7, total: 1432 },
+                                        { name: 'Pakistan', turnout: 68.2, total: 2891 },
+                                        { name: 'Bangladesh', turnout: 66.9, total: 1567 },
+                                        { name: 'Sudan', turnout: 59.8, total: 789 },
+                                        { name: 'Syria', turnout: 58.3, total: 654 },
+                                        { name: 'Iraq', turnout: 55.6, total: 987 },
+                                        { name: 'Iran', turnout: 55.5, total: 1234 },
+                                        { name: 'Cham', turnout: 55.2, total: 432 },
+                                        { name: 'Eritrea', turnout: 50.2, total: 321 },
+                                        { name: 'Lebanon', turnout: 44.2, total: 876 },
+                                        { name: 'Afghanistan', turnout: 41.4, total: 543 },
+                                        { name: 'Ethiopia', turnout: 41.2, total: 765 },
+                                        { name: 'Somalia', turnout: 29.1, total: 234 }
+                                    ],
+                                    hoveredCountry: null,
+                                    showAll: false,
+
+                                    initChart() {
+                                        this.countries = this.countries.sort((a, b) => b.turnout - a.turnout);
+                                    },
+
+                                    getBarColor(turnout) {
+                                        if (turnout >= 80) return 'rgb(16, 185, 129)';  // emerald-500
+                                        if (turnout >= 60) return 'rgb(59, 130, 246)';  // blue-500
+                                        if (turnout >= 40) return 'rgb(245, 158, 11)';  // amber-500
+                                        return 'rgb(239, 68, 68)';  // red-500
+                                    },
+
+                                    formatNumber(num) {
+                                        return new Intl.NumberFormat().format(num);
+                                    },
+
+                                    get displayedCountries() {
+                                        return this.showAll ? this.countries : this.countries.slice(0, 10);
+                                    }
+                                }));
+                            });
+                        </script>
+                    }">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="font-medium">Voter Turnout Distribution (option 2)</h3>
+                            <div class="flex items-center gap-2 text-xs text-gray-500">
+                                <span class="flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                    High Turnout
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+                                    Low Turnout
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 max-h-[460px] overflow-y-auto pr-1">
+                            <template x-for="(country, index) in displayedCountries" :key="country.name">
+                                <div class="relative overflow-hidden rounded-xl border border-slate-200/60 bg-white/80 backdrop-blur-sm p-4 group hover:border-blue-500/40 hover:shadow-[0_15px_35px_-20px_rgba(37,99,235,0.55)] transition-all duration-200">
+                                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-blue-500/10 via-transparent to-transparent transition-opacity duration-200"></div>
+                                    <div class="relative flex items-center justify-between gap-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="h-10 w-10 rounded-xl bg-blue-100 text-blue-600 font-semibold grid place-items-center text-sm">
+                                                <span x-text="String(index + 1).padStart(2, '0')"></span>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-semibold text-slate-800" x-text="country.name"></p>
+                                                <p class="text-xs text-slate-500" x-text="formatNumber(country.total) + ' voters'"></p>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm font-semibold text-slate-600" x-text="country.turnout + '%'">
+                                        </span>
+                                    </div>
+                                    <div class="relative mt-3 h-2 rounded-full bg-slate-200/70 overflow-hidden">
+                                        <div class="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-sky-400 shadow-[0_0_18px_rgba(37,99,235,0.35)] transition-all duration-300"
+                                             :style="{ width: Math.min(country.turnout, 100) + '%' }"></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        
+                        <div class="flex justify-end mt-4">
+                            <button 
+                                @click="showAll = !showAll" 
+                                class="text-xs font-medium text-blue-600 hover:text-blue-500 transition-colors">
+                                <span x-text="showAll ? 'Show less' : 'View all countries'"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Futuristic Bar Graph Widget -->
+                    <div class="lg:col-span-6 card p-4 self-start" style="min-height: 0;">
+                         <div class="flex items-center justify-between mb-4">
+                             <div>
+                                 <h3 class="font-medium">Turnout Distribution by Country of Origin (option 3)</h3>
+                                 <p class="text-xs text-slate-500 mt-1">Hover to see total voters for each country</p>
+                             </div>
+                             <div class="flex items-center gap-2 text-xs text-gray-500">
+                                 <span class="flex items-center gap-1">
+                                     <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                     Turnout %
+                                 </span>
+                             </div>
+                         </div>
+                         <div class="relative h-[220px]">
+                             <canvas id="turnoutBarChart"></canvas>
+                         </div>
+                     </div>
                 </div>
             </div>
         </div>
@@ -1470,6 +1591,93 @@
                 }
             }
         });
+
+        const futuristicCtx = document.getElementById('turnoutBarChart');
+        if (futuristicCtx) {
+            const countryLabels = ['Morocco', 'Kashmir', 'India', 'Egypt', 'American', 'Turkey', 'Bosnia & Herzegovina', 'Palestine', 'Pakistan', 'Bangladesh', 'Sudan', 'Syria', 'Iraq', 'Iran', 'Cham', 'Eritrea', 'Lebanon', 'Afghanistan', 'Ethiopia', 'Somalia'];
+            const turnoutValues = [100.0, 88.9, 82.3, 80.0, 74.9, 69.0, 68.9, 68.7, 68.2, 66.9, 59.8, 58.3, 55.6, 55.5, 55.2, 50.2, 44.2, 41.4, 41.2, 29.1];
+            const totalValues = [18, 20, 214, 116, 892, 3716, 5678, 1432, 2891, 1567, 789, 654, 987, 1234, 432, 321, 876, 543, 765, 234];
+
+            new Chart(futuristicCtx, {
+                type: 'bar',
+                data: {
+                    labels: countryLabels,
+                    datasets: [{
+                        label: 'Turnout %',
+                        data: turnoutValues,
+                        backgroundColor: ctx => {
+                            const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 320);
+                            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.95)');
+                            gradient.addColorStop(1, 'rgba(14, 165, 233, 0.45)');
+                            return gradient;
+                        },
+                        borderRadius: 12,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.6,
+                        hoverBackgroundColor: '#2563eb'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#4b5563',
+                                font: {
+                                    family: "'Inter', sans-serif",
+                                    size: 11
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 110,
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.2)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#4b5563',
+                                font: {
+                                    family: "'Inter', sans-serif",
+                                    size: 11
+                                },
+                                callback: value => value + '%'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: {
+                                family: "'Inter', sans-serif",
+                                size: 13,
+                                weight: '600'
+                            },
+                            bodyFont: {
+                                family: "'Inter', sans-serif",
+                                size: 12
+                            },
+                            padding: 12,
+                            cornerRadius: 10,
+                            callbacks: {
+                                label: context => {
+                                    const index = context.dataIndex;
+                                    return [`Turnout: ${context.parsed.y}%`, `Total Voters: ${totalValues[index].toLocaleString()}`];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
 
         // Filter functions
