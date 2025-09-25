@@ -289,7 +289,7 @@
         <header class="mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-6">
                 <div class="flex items-center gap-4 sm:gap-6">
-                    <img src="../assets/amac-logo.png" alt="AMAC Logo" class="h-12 sm:h-16 w-auto" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));" />
+                    <img src="assets/amac-logo.png" alt="AMAC Logo" class="h-12 sm:h-16 w-auto" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));" />
                     <div class="border-l border-gray-200 pl-4 sm:pl-6">
                         <h1 class="text-xl sm:text-2xl font-bold">Voter Analytics</h1>
                         <p class="text-xs text-gray-400">Last updated: April 2024</p>
@@ -574,9 +574,9 @@
                 </div>
 
                 <!-- Map & Charts -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
                     <!-- Top Row: Map and Turnout -->
-                    <div class="lg:col-span-8 card" style="height: 400px" x-data="choroplethMap()" x-init="init()">
+                    <div class="lg:col-span-8 card" style="height: 520px" x-data="choroplethMap()" x-init="init()">
                         <div class="absolute top-4 left-4 right-4 z-10 flex justify-between items-start">
                             <div>
                                 <h3 class="font-medium text-gray-900" x-text="title"></h3>
@@ -692,12 +692,13 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100">
-                            <div>
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                            <div class="text-center flex-1">
                                 <p class="text-xs uppercase tracking-wide text-slate-500">Eligible Voters</p>
                                 <p class="text-xl font-semibold text-slate-900" x-text="formatNumber(totalEligible)"></p>
                             </div>
-                            <div>
+                            <div class="h-10 w-px bg-slate-200 mx-4"></div>
+                            <div class="text-center flex-1">
                                 <p class="text-xs uppercase tracking-wide text-slate-500">Ballots Cast</p>
                                 <p class="text-xl font-semibold text-slate-900" x-text="formatNumber(totalVoted)"></p>
                             </div>
@@ -2708,6 +2709,7 @@
                     });
 
                     mapInstance.on('load', () => {
+                        this.datasetKey = window.currentDatasetKey || this.datasetKey;
                         this.loadDataset(mapInstance, this.datasetKey);
                         mapInstance.addControl(new mapboxgl.NavigationControl(), 'top-right');
                     });
@@ -2788,23 +2790,76 @@
                 openModal() {
                     this.modalOpen = true;
                     this.$nextTick(() => {
-                        if (!this.expandedMap) {
-                            this.initializeMap('expanded-map', true);
-                        } else {
-                            this.loadDataset(this.expandedMap, this.datasetKey);
+                        const targetKey = window.currentDatasetKey || this.datasetKey;
+                        if (this.expandedMap) {
+                            try {
+                                this.expandedMap.remove();
+                            } catch (error) {
+                                console.warn('Failed to remove expanded map', error);
+                            }
+                            this.expandedMap = null;
+                            window.expandedMapInstance = null;
                         }
+                        requestAnimationFrame(() => this.initializeExpandedMap(targetKey));
                     });
                 },
                 closeModal() {
                     this.modalOpen = false;
+                    if (this.expandedMap) {
+                        try {
+                            this.expandedMap.remove();
+                        } catch (error) {
+                            console.warn('Failed to remove expanded map on close', error);
+                        }
+                        this.expandedMap = null;
+                        window.expandedMapInstance = null;
+                    }
+                },
+                initializeExpandedMap(initialKey) {
+                    const mapInstance = new mapboxgl.Map({
+                        container: 'expanded-map',
+                        style: 'mapbox://styles/mapbox/light-v11',
+                        center: window.stateConfigs[window.currentStateKey]?.center || [-120.740135, 47.751076],
+                        zoom: window.stateConfigs[window.currentStateKey]?.zoom || 6,
+                        pitch: 0,
+                        bearing: 0,
+                        antialias: true
+                    });
+
+                    mapInstance.on('load', () => {
+                        mapInstance.addControl(new mapboxgl.NavigationControl(), 'top-right');
+                        this.loadDataset(mapInstance, initialKey || window.currentDatasetKey || this.datasetKey);
+                        requestAnimationFrame(() => {
+                            try {
+                                mapInstance.resize();
+                            } catch (error) {
+                                console.warn('Failed to resize expanded map after load', error);
+                            }
+                        });
+                    });
+
+                    mapInstance.on('error', (e) => {
+                        console.error('Expanded map error:', e);
+                    });
+
+                    this.expandedMap = mapInstance;
+                    window.expandedMapInstance = mapInstance;
                 },
                 switchDataset(key) {
+                    window.currentDatasetKey = key;
                     this.datasetKey = key;
                     if (this.map) {
                         this.loadDataset(this.map, key);
                     }
                     if (this.expandedMap) {
                         this.loadDataset(this.expandedMap, key);
+                        requestAnimationFrame(() => {
+                            try {
+                                this.expandedMap.resize();
+                            } catch (error) {
+                                console.warn('Failed to resize expanded map after dataset switch', error);
+                            }
+                        });
                     }
                 }
             }));
