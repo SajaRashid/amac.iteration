@@ -330,14 +330,14 @@
                         document.querySelectorAll('.stat-value')[1].textContent = turnoutData[election] + '%';
                         
                         // Update chart to highlight selected election
-                        if (window.turnoutChart) {
+                        if (window.turnoutBarChart) {
                             const allElections = ['Aug 2025', 'Nov 2024', 'Aug 2024', 'Feb 2024', 'Nov 2023', 'Aug 2023'];
                             const data = allElections.map(e => turnoutData[e]);
-                            window.turnoutChart.data.datasets[0].data = data;
-                            window.turnoutChart.data.datasets[0].backgroundColor = data.map((d, i) => 
+                            window.turnoutBarChart.data.datasets[0].data = data;
+                            window.turnoutBarChart.data.datasets[0].backgroundColor = data.map((d, i) => 
                                 allElections[i] === election ? '#1d4ed8' : '#2563eb'
                             );
-                            window.turnoutChart.update();
+                            window.turnoutBarChart.update();
                         }
                     }
                 }">
@@ -586,10 +586,54 @@
                         </div>
                     </div>
 
-                    <div class="lg:col-span-4 card p-4">
-                        <h3 class="font-medium mb-4">Turnout by Election</h3>
-                        <div style="height: 300px; position: relative;">
-                            <canvas id="turnoutChart"></canvas>
+                    <div class="lg:col-span-4 card p-4 space-y-4" x-data="turnoutGaugeWidget(53, 61821, 32795)" :class="expanded ? 'ring-2 ring-primary/50 shadow-lg shadow-primary/20' : ''">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-sm text-slate-500 uppercase tracking-wide">Voting Turnout</p>
+                                <h3 class="text-lg font-semibold text-slate-900 mt-1">Current Participation Snapshot</h3>
+                            </div>
+                            <button class="p-2 rounded-lg bg-slate-100/80 text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors" @click="toggleFullscreen" :aria-pressed="expanded">
+                                <i :data-lucide="expanded ? 'minimize' : 'expand'" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <div class="relative flex items-center justify-center">
+                            <svg viewBox="0 0 200 120" class="w-full max-w-xs">
+                                <defs>
+                                    <linearGradient id="turnoutGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#2563eb" />
+                                        <stop offset="100%" stop-color="#22d3ee" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M20 100 A80 80 0 0 1 180 100" stroke="url(#turnoutGradient)" stroke-width="18" stroke-linecap="round" fill="transparent" opacity="0.12" />
+                                <path :stroke-dasharray="gaugeStroke" :stroke-dashoffset="gaugeOffset" d="M20 100 A80 80 0 0 1 180 100" stroke="url(#turnoutGradient)" stroke-width="18" stroke-linecap="round" fill="transparent" class="transition-all duration-500 ease-out" />
+                                <circle :cx="needlePosition.x" :cy="needlePosition.y" r="6" class="fill-white transition-all duration-500 ease-out" stroke="#2563eb" stroke-width="2" />
+                            </svg>
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[30%] text-center">
+                                <p class="text-3xl font-bold text-slate-900" x-text="turnout + '%'">53%</p>
+                                <p class="text-xs uppercase tracking-[0.35em] text-slate-500">Turnout</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+                            <div>
+                                <p class="text-xs uppercase tracking-wide text-slate-500">Eligible Voters</p>
+                                <p class="text-xl font-semibold text-slate-900" x-text="formatNumber(totalEligible)"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs uppercase tracking-wide text-slate-500">Ballots Cast</p>
+                                <p class="text-xl font-semibold text-slate-900" x-text="formatNumber(totalVoted)"></p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50/60 rounded-xl p-3">
+                            <div class="flex items-center justify-between text-[11px] uppercase tracking-wider text-slate-500">
+                                <span>Trend by Election</span>
+                                <span class="text-slate-700 font-semibold" x-text="trendLabel"></span>
+                            </div>
+                            <div class="h-24 mt-2">
+                                <canvas id="turnoutTrendSparkline"></canvas>
+                            </div>
                         </div>
                     </div>
 
@@ -985,6 +1029,42 @@
             })
         })
 
+        function turnoutGaugeWidget(initialTurnout, totalEligible, totalVoted) {
+            const radius = 80;
+            const circumference = Math.PI * radius;
+
+            return {
+                turnout: Number(initialTurnout) || 0,
+                totalEligible,
+                totalVoted,
+                expanded: false,
+                get gaugeStroke() {
+                    return circumference;
+                },
+                get gaugeOffset() {
+                    const ratio = Math.max(0, Math.min(this.turnout, 100)) / 100;
+                    return circumference * (1 - ratio);
+                },
+                get needlePosition() {
+                    const clamped = Math.max(0, Math.min(this.turnout, 100));
+                    const angle = Math.PI - (Math.PI * (clamped / 100));
+                    return {
+                        x: 100 + radius * Math.cos(angle),
+                        y: 100 - radius * Math.sin(angle)
+                    };
+                },
+                toggleFullscreen() {
+                    this.expanded = !this.expanded;
+                },
+                get trendLabel() {
+                    return this.turnout + '% • steady';
+                },
+                formatNumber(value) {
+                    return new Intl.NumberFormat().format(value);
+                }
+            };
+        }
+
         // Wait for Chart.js to load
         window.addEventListener('DOMContentLoaded', () => {
             // Initialize charts first
@@ -993,99 +1073,34 @@
 
         function initializeCharts() {
             // Initialize turnout chart
-            const turnoutCtx = document.getElementById('turnoutChart');
+            const turnoutCtx = document.getElementById('turnoutTrendSparkline');
             if (turnoutCtx) {
                 new Chart(turnoutCtx, {
-                    type: 'bar',
+                    type: 'line',
                     data: {
-                        labels: ['Aug 25', 'Nov 24', 'Aug 24', 'Feb 24', 'Nov 23', 'Aug 23'],
+                        labels: ['Nov 23', 'Feb 24', 'Aug 24', 'Nov 24', 'Aug 25'],
                         datasets: [{
-                            data: [0, 76, 68, 58, 72, 65],
-                            backgroundColor: '#2563eb',
-                            borderRadius: {
-                                topLeft: 4,
-                                topRight: 4
-                            },
-                            barThickness: 30,
-                            barPercentage: 0.6,
-                            categoryPercentage: 0.8,
-                            hoverBackgroundColor: '#1d4ed8'
+                            data: [49, 52, 55, 51, 53],
+                            borderColor: '#2563eb',
+                            borderWidth: 2.5,
+                            pointRadius: 0,
+                            tension: 0.4,
+                            fill: {
+                                target: 'origin',
+                                above: 'rgba(37, 99, 235, 0.12)'
+                            }
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        layout: {
-                            padding: {
-                                top: 20,
-                                right: 20,
-                                bottom: 20,
-                                left: 20
-                            }
-                        },
                         scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 100,
-                                grid: {
-                                    color: '#f3f4f6',
-                                    drawBorder: false
-                                },
-                                border: {
-                                    display: false
-                                },
-                                ticks: {
-                                    color: '#4b5563',
-                                    font: {
-                                        family: "'Inter', sans-serif",
-                                        size: 12
-                                    },
-                                    padding: 8,
-                                    callback: function(value) {
-                                        return value + '%';
-                                    }
-                                }
-                            },
-                            x: {
-                                grid: {
-                                    display: false
-                                },
-                                border: {
-                                    display: false
-                                },
-                                ticks: {
-                                    color: '#4b5563',
-                                    font: {
-                                        family: "'Inter', sans-serif",
-                                        size: 12
-                                    },
-                                    padding: 8
-                                }
-                            }
+                            x: { display: false },
+                            y: { display: false, suggestedMin: 45, suggestedMax: 60 }
                         },
                         plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                backgroundColor: '#1f2937',
-                                titleFont: {
-                                    family: "'Inter', sans-serif",
-                                    size: 14,
-                                    weight: '600'
-                                },
-                                bodyFont: {
-                                    family: "'Inter', sans-serif",
-                                    size: 13
-                                },
-                                padding: 12,
-                                cornerRadius: 8,
-                                callbacks: {
-                                    label: function(context) {
-                                        return context.parsed.y + '% Turnout';
-                                    }
-                                }
-                            }
+                            legend: { display: false },
+                            tooltip: { enabled: false }
                         }
                     }
                 });
@@ -1498,99 +1513,102 @@
         `;
         document.body.appendChild(dateRangeModal);
 
-        const turnoutCtx = document.getElementById('turnoutChart').getContext('2d');
-        const turnoutChart = new Chart(turnoutCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Aug 23', 'Nov 23','Feb 24', 'Aug 24', 'Nov 24', 'Aug 25'],
-                datasets: [{
-                    data: [58, 65, 72, 68, 76, null],
-                    backgroundColor: '#2563eb',
-                    borderRadius: {
-                        topLeft: 4,
-                        topRight: 4
-                    },
-                    barThickness: 40,
-                    hoverBackgroundColor: '#1d4ed8'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                    padding: {
-                        top: 20,
-                        right: 20,
-                        bottom: 20,
-                        left: 20
-                    }
+        const electionChartCanvas = document.getElementById('turnoutByElectionChart');
+        if (electionChartCanvas) {
+            const turnoutBarCtx = electionChartCanvas.getContext('2d');
+            window.turnoutBarChart = new Chart(turnoutBarCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Aug 23', 'Nov 23','Feb 24', 'Aug 24', 'Nov 24', 'Aug 25'],
+                    datasets: [{
+                        data: [58, 65, 72, 68, 76, null],
+                        backgroundColor: '#2563eb',
+                        borderRadius: {
+                            topLeft: 4,
+                            topRight: 4
+                        },
+                        barThickness: 40,
+                        hoverBackgroundColor: '#1d4ed8'
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        grid: {
-                            color: '#f3f4f6',
-                            drawBorder: false
-                        },
-                        border: {
-                            display: false
-                        },
-                        ticks: {
-                            color: '#4b5563',
-                            font: {
-                                family: "'Inter', sans-serif",
-                                size: 12
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 20,
+                            right: 20,
+                            bottom: 20,
+                            left: 20
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: '#f3f4f6',
+                                drawBorder: false
                             },
-                            padding: 8,
-                            callback: function(value) {
-                                return value + '%';
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#4b5563',
+                                font: {
+                                    family: "'Inter', sans-serif",
+                                    size: 12
+                                },
+                                padding: 8,
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#4b5563',
+                                font: {
+                                    family: "'Inter', sans-serif",
+                                    size: 12
+                                },
+                                padding: 8
                             }
                         }
                     },
-                    x: {
-                        grid: {
+                    plugins: {
+                        legend: {
                             display: false
                         },
-                        border: {
-                            display: false
-                        },
-                        ticks: {
-                            color: '#4b5563',
-                            font: {
+                        tooltip: {
+                            backgroundColor: '#1f2937',
+                            titleFont: {
                                 family: "'Inter', sans-serif",
-                                size: 12
+                                size: 14,
+                                weight: '600'
                             },
-                            padding: 8
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: '#1f2937',
-                        titleFont: {
-                            family: "'Inter', sans-serif",
-                            size: 14,
-                            weight: '600'
-                        },
-                        bodyFont: {
-                            family: "'Inter', sans-serif",
-                            size: 13
-                        },
-                        padding: 12,
-                        cornerRadius: 8,
-                        callbacks: {
-                            label: function(context) {
-                                return context.parsed.y + '% Turnout';
+                            bodyFont: {
+                                family: "'Inter', sans-serif",
+                                size: 13
+                            },
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y + '% Turnout';
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
 
         const futuristicCtx = document.getElementById('turnoutBarChart');
         if (futuristicCtx) {
