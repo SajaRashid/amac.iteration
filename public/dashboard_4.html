@@ -313,30 +313,21 @@
                     open: false,
                     selectedElection: 'Nov 2024',
                     elections: ['Aug 2025', 'Nov 2024', 'Aug 2024', 'Feb 2024', 'Nov 2023', 'Aug 2023'],
+                    init() {
+                        if (window.dashboardFilters) {
+                            this.selectedElection = window.dashboardFilters.election;
+                        }
+                        window.addEventListener('dashboard:update', (event) => {
+                            if (event.detail?.filters?.election) {
+                                this.selectedElection = event.detail.filters.election;
+                            }
+                        });
+                    },
                     updateElection(election) {
                         this.selectedElection = election;
-                        // Update turnout data based on selected election
-                        const turnoutData = {
-                            'Aug 2025': 0,  // Future election
-                            'Nov 2024': 76,
-                            'Aug 2024': 68,
-                            'Nov 2023': 72,
-                            'Aug 2023': 65,
-                            'Feb 2024': 58
-                        };
-                        
-                        // Update the turnout stat
-                        document.querySelectorAll('.stat-value')[1].textContent = turnoutData[election] + '%';
-                        
-                        // Update chart to highlight selected election
-                        if (window.turnoutBarChart) {
-                            const allElections = ['Aug 2025', 'Nov 2024', 'Aug 2024', 'Feb 2024', 'Nov 2023', 'Aug 2023'];
-                            const data = allElections.map(e => turnoutData[e]);
-                            window.turnoutBarChart.data.datasets[0].data = data;
-                            window.turnoutBarChart.data.datasets[0].backgroundColor = data.map((d, i) => 
-                                allElections[i] === election ? '#1d4ed8' : '#2563eb'
-                            );
-                            window.turnoutBarChart.update();
+                        if (window.dashboardFilters) {
+                            window.dashboardFilters.election = election;
+                            window.applyDashboardFilters?.();
                         }
                     }
                 }">
@@ -373,7 +364,7 @@
                         </div>
                         <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 flex-shrink-0"></i>
                     </button>
-                    <div x-show="open" @click.away="close" class="dropdown-menu mt-1">
+                    <div x-show="open" @click.away="close()" class="dropdown-menu mt-1">
                         <div class="py-1">
                             <template x-for="state in states" :key="state.key">
                                 <button 
@@ -397,55 +388,33 @@
                 <div class="dropdown-container" 
                     x-data="{ 
                         open: false, 
-                        selected: 'Counties',
-                        updateView() {
-                            const data = {
-                                'Counties': { count: 89450, areas: ['King County', 'Pierce County', 'Snohomish County'] },
-                                'Legislative Districts': { count: 52340, areas: ['1st District', '2nd District', '3rd District'] },
-                                'Congressional Districts': { count: 45230, areas: ['7th District', '8th District', '9th District'] },
-                                'Cities': { count: 32180, areas: ['Seattle', 'Bellevue', 'Tacoma'] },
-                                'School Districts': { count: 28900, areas: ['Seattle Public Schools', 'Bellevue School District', 'Spokane School District'] }
-                            };
-
-                            // Update voter count with selected jurisdiction's data
-                            const totalVoters = data[this.selected]?.count || 0;
-                            
-                            // Update the stats
-                            document.querySelectorAll('.stat-value')[0].textContent = totalVoters.toLocaleString();
-                            
-                            // Update the map via Alpine store
-                            if (window.updateChoroplethView) {
-                                window.updateChoroplethView(this.selected);
-                            }
+                        selected: window.dashboardFilters?.jurisdiction || 'Counties',
+                        options: ['Counties', 'Legislative Districts', 'Congressional Districts', 'Cities', 'School Districts'],
+                        init() {
+                            window.addEventListener('dashboard:update', (event) => {
+                                if (event.detail?.filters?.jurisdiction) {
+                                    this.selected = event.detail.filters.jurisdiction;
+                                }
+                            });
+                        },
+                        updateView(value) {
+                            this.selected = value;
+                            window.applyDashboardFilters?.({ jurisdiction: value });
                         }
                     }"
-                    @change="updateView">
+                    x-init="init()">
                     <button @click="open = !open" class="w-full h-[34px] flex items-center justify-between bg-white border border-gray-200 rounded px-2 hover:border-gray-300 transition-colors">
                         <span class="text-sm text-gray-900 leading-none" x-text="selected || 'Select jurisdiction'">Select jurisdiction</span>
                         <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 flex-shrink-0 ml-1.5"></i>
                     </button>
                     <div x-show="open" @click.away="open = false" class="dropdown-menu mt-1">
                         <div class="py-1">
+                            <template x-for="option in options" :key="option">
                             <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
-                                <input type="radio" name="jurisdiction" class="text-primary" value="Counties" x-model="selected">
-                                <span class="text-sm text-gray-900">Counties</span>
+                                    <input type="radio" name="jurisdiction" class="text-primary" :value="option" :checked="selected === option" @change="updateView(option)">
+                                    <span class="text-sm text-gray-900" x-text="option"></span>
                             </label>
-                            <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
-                                <input type="radio" name="jurisdiction" class="text-primary" value="Legislative Districts" x-model="selected">
-                                <span class="text-sm text-gray-900">Legislative Districts</span>
-                            </label>
-                            <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
-                                <input type="radio" name="jurisdiction" class="text-primary" value="Congressional Districts" x-model="selected">
-                                <span class="text-sm text-gray-900">Congressional Districts</span>
-                            </label>
-                            <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
-                                <input type="radio" name="jurisdiction" class="text-primary" value="Cities" x-model="selected">
-                                <span class="text-sm text-gray-900">Cities</span>
-                            </label>
-                            <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
-                                <input type="radio" name="jurisdiction" class="text-primary" value="School Districts" x-model="selected">
-                                <span class="text-sm text-gray-900">School Districts</span>
-                            </label>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -458,47 +427,33 @@
                     x-data="{ 
                         open: false,
                         search: '',
-                        selected: [],
-                        countries: [
-                            'Afghanistan', 'Albania', 'Algeria', 'American', 'Australia',
-                            'Bangladesh', 'Belize', 'Bosnia and Herzegovina', 'Brunei', 'Cham',
-                            'Costa Rica', 'Egypt', 'Eritrea', 'Estonia', 'Ethiopia',
-                            'Guatemala', 'India', 'Indonesia', 'Iran', 'Iraq',
-                            'Jordan', 'Kashmir', 'Lebanon', 'Mexico', 'Morocco',
-                            'Myanmar', 'Pakistan', 'Palestine', 'Samoa', 'Saint Vincent and the Grenadines',
-                            'Singapore', 'Somalia', 'South Africa', 'Sudan', 'Syria',
-                            'Thailand', 'Tunisia', 'Turkey', 'Viet Nam', 'Yemen'
-                        ],
+                        selected: window.dashboardFilters?.countries ? [...window.dashboardFilters.countries] : [],
+                        countries: window.dashboardData?.countryOptions || [],
+                        init() {
+                            if (window.dashboardFilters?.countries) {
+                                this.selected = [...window.dashboardFilters.countries];
+                            }
+                            window.addEventListener('dashboard:update', (event) => {
+                                if (Array.isArray(event.detail?.filters?.countries)) {
+                                    this.selected = [...event.detail.filters.countries];
+                                }
+                            });
+                        },
                         get filteredCountries() {
                             return this.countries.filter(country => 
                                 country.toLowerCase().includes(this.search.toLowerCase())
                             );
                         },
-                        updateView() {
-                            // Sample data distribution for visualization
-                            const countryData = {};
-                            this.selected.forEach((country, index) => {
-                                countryData[country] = Math.floor(100 / (this.selected.length || 1));
-                            });
-
-                            // Update the donut chart
-                            const ctx = document.getElementById('ethnicityChart').getContext('2d');
-                            
-                            // Create new data for selected countries
-                            const chartData = {
-                                labels: this.selected,
-                                data: this.selected.map(c => countryData[c] || 0)
-                            };
-
-                            // Update or create chart
-                            if (window.ethnicityChart) {
-                                window.ethnicityChart.data.labels = chartData.labels;
-                                window.ethnicityChart.data.datasets[0].data = chartData.data;
-                                window.ethnicityChart.update();
+                        toggleCountry(country) {
+                            if (this.selected.includes(country)) {
+                                this.selected = this.selected.filter(c => c !== country);
+                            } else {
+                                this.selected = [...this.selected, country];
                             }
+                            window.applyDashboardFilters?.({ countries: [...this.selected] });
                         }
                     }"
-                    @change="updateView">
+                    x-init="init()">
                     <button @click="open = !open" class="w-full h-[34px] flex items-center justify-between bg-white border border-gray-200 rounded px-2 hover:border-gray-300 transition-colors">
                         <span class="text-sm text-gray-900 leading-none" x-text="selected.length ? selected.join(', ') : 'Select countries'">Select countries</span>
                         <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 flex-shrink-0 ml-1.5"></i>
@@ -520,7 +475,7 @@
                         <div class="py-1 max-h-48 overflow-y-auto">
                             <template x-for="country in filteredCountries" :key="country">
                                 <label class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
-                                    <input type="checkbox" class="text-primary rounded" :value="country" x-model="selected">
+                            <input type="checkbox" class="text-primary rounded" :value="country" :checked="selected.includes(country)" @change="toggleCountry(country)">
                                     <span class="text-sm text-gray-900" x-text="country"></span>
                                 </label>
                             </template>
@@ -662,7 +617,7 @@
                         </template>
                     </div>
 
-                    <div class="lg:col-span-4 card p-4 space-y-4" x-data="turnoutGaugeWidget(53, 61821, 32795)" :class="expanded ? 'ring-2 ring-primary/50 shadow-lg shadow-primary/20' : ''">
+                    <div class="lg:col-span-4 card p-4 space-y-4" x-data="turnoutGaugeWidget()" :class="expanded ? 'ring-2 ring-primary/50 shadow-lg shadow-primary/20' : ''">
                         <div class="flex items-start justify-between">
                             <div>
                                 <p class="text-sm text-slate-500 uppercase tracking-wide">Voting Turnout</p>
@@ -891,51 +846,33 @@
                          x-init="initChart()">
                         <script>
                             document.addEventListener('alpine:init', () => {
-                                Alpine.data('turnoutChart', () => ({
-                                    countries: [
-                                        { name: 'Morocco', turnout: 100.0, total: 18 },
-                                        { name: 'Kashmir', turnout: 88.9, total: 20 },
-                                        { name: 'India', turnout: 82.3, total: 214 },
-                                        { name: 'Egypt', turnout: 80.0, total: 116 },
-                                        { name: 'American', turnout: 74.9, total: 892 },
-                                        { name: 'Turkey', turnout: 69.0, total: 3716 },
-                                        { name: 'Bosnia and Herzegovina', turnout: 68.9, total: 5678 },
-                                        { name: 'Palestine', turnout: 68.7, total: 1432 },
-                                        { name: 'Pakistan', turnout: 68.2, total: 2891 },
-                                        { name: 'Bangladesh', turnout: 66.9, total: 1567 },
-                                        { name: 'Sudan', turnout: 59.8, total: 789 },
-                                        { name: 'Syria', turnout: 58.3, total: 654 },
-                                        { name: 'Iraq', turnout: 55.6, total: 987 },
-                                        { name: 'Iran', turnout: 55.5, total: 1234 },
-                                        { name: 'Cham', turnout: 55.2, total: 432 },
-                                        { name: 'Eritrea', turnout: 50.2, total: 321 },
-                                        { name: 'Lebanon', turnout: 44.2, total: 876 },
-                                        { name: 'Afghanistan', turnout: 41.4, total: 543 },
-                                        { name: 'Ethiopia', turnout: 41.2, total: 765 },
-                                        { name: 'Somalia', turnout: 29.1, total: 234 }
-                                    ],
-                                    hoveredCountry: null,
-                                    showAll: false,
-
-                                    initChart() {
-                                        this.countries = this.countries.sort((a, b) => b.turnout - a.turnout);
-                                    },
-
-                                    getBarColor(turnout) {
-                                        if (turnout >= 80) return 'rgb(16, 185, 129)';  // emerald-500
-                                        if (turnout >= 60) return 'rgb(59, 130, 246)';  // blue-500
-                                        if (turnout >= 40) return 'rgb(245, 158, 11)';  // amber-500
-                                        return 'rgb(239, 68, 68)';  // red-500
-                                    },
-
-                                    formatNumber(num) {
-                                        return new Intl.NumberFormat().format(num);
-                                    },
-
-                                    get displayedCountries() {
-                                        return this.showAll ? this.countries : this.countries.slice(0, 10);
-                                    }
-                                }));
+            Alpine.data('turnoutChart', () => ({
+                countries: [],
+                hoveredCountry: null,
+                showAll: false,
+                init() {
+                    const metrics = window.dashboardMetrics?.countries ?? window.computeCountryMetrics();
+                    this.countries = metrics.list || [];
+                    window.addEventListener('dashboard:update', (event) => {
+                        const list = event.detail?.metrics?.countries?.list;
+                        if (Array.isArray(list)) {
+                            this.countries = list;
+                        }
+                    });
+                },
+                getBarColor(turnout) {
+                    if (turnout >= 80) return 'rgb(16, 185, 129)';
+                    if (turnout >= 60) return 'rgb(59, 130, 246)';
+                    if (turnout >= 40) return 'rgb(245, 158, 11)';
+                    return 'rgb(239, 68, 68)';
+                },
+                formatNumber(num) {
+                    return new Intl.NumberFormat().format(num);
+                },
+                get displayedCountries() {
+                    return this.showAll ? this.countries : this.countries.slice(0, 10);
+                }
+            }));
                             });
                         </script>
                     }">
@@ -1923,6 +1860,287 @@
             }
         };
 
+        window.dashboardFilters = {
+            state: window.defaultStateKey,
+            election: 'Nov 2024',
+            jurisdiction: 'Counties',
+            countries: []
+        };
+
+        window.dashboardData = {
+            electionModifiers: {
+                'Nov 2024': 1,
+                'Aug 2024': 0.93,
+                'Feb 2024': 0.88,
+                'Nov 2023': 0.91,
+                'Aug 2023': 0.86,
+                'Aug 2025': 1.05
+            },
+            countryOptions: [
+                'Afghanistan', 'Albania', 'Algeria', 'American', 'Australia',
+                'Bangladesh', 'Belize', 'Bosnia and Herzegovina', 'Brunei', 'Cham',
+                'Costa Rica', 'Egypt', 'Eritrea', 'Estonia', 'Ethiopia',
+                'Guatemala', 'India', 'Indonesia', 'Iran', 'Iraq',
+                'Jordan', 'Kashmir', 'Lebanon', 'Mexico', 'Morocco',
+                'Myanmar', 'Pakistan', 'Palestine', 'Samoa', 'Saint Vincent and the Grenadines',
+                'Singapore', 'Somalia', 'South Africa', 'Sudan', 'Syria',
+                'Thailand', 'Tunisia', 'Turkey', 'Viet Nam', 'Yemen'
+            ],
+            baseCountries: [
+                { name: 'Morocco', turnout: 100.0, total: 18 },
+                { name: 'Kashmir', turnout: 88.9, total: 20 },
+                { name: 'India', turnout: 82.3, total: 214 },
+                { name: 'Egypt', turnout: 80.0, total: 116 },
+                { name: 'American', turnout: 74.9, total: 892 },
+                { name: 'Turkey', turnout: 69.0, total: 3716 },
+                { name: 'Bosnia and Herzegovina', turnout: 68.9, total: 5678 },
+                { name: 'Palestine', turnout: 68.7, total: 1432 },
+                { name: 'Pakistan', turnout: 68.2, total: 2891 },
+                { name: 'Bangladesh', turnout: 66.9, total: 1567 },
+                { name: 'Sudan', turnout: 59.8, total: 789 },
+                { name: 'Syria', turnout: 58.3, total: 654 },
+                { name: 'Iraq', turnout: 55.6, total: 987 },
+                { name: 'Iran', turnout: 55.5, total: 1234 },
+                { name: 'Cham', turnout: 55.2, total: 432 },
+                { name: 'Eritrea', turnout: 50.2, total: 321 },
+                { name: 'Lebanon', turnout: 44.2, total: 876 },
+                { name: 'Afghanistan', turnout: 41.4, total: 543 },
+                { name: 'Ethiopia', turnout: 41.2, total: 765 },
+                { name: 'Somalia', turnout: 29.1, total: 234 }
+            ]
+        };
+
+        window.stateBaseStats = {};
+        Object.entries(window.stateConfigs).forEach(([key, config]) => {
+            if (config?.stats) {
+                window.stateBaseStats[key] = JSON.parse(JSON.stringify(config.stats));
+            }
+        });
+
+        const clampValue = (value, min, max) => Math.min(Math.max(value, min), max);
+
+        window.getElectionModifier = (election) => {
+            return window.dashboardData.electionModifiers[election] ?? 1;
+        };
+
+        window.computeCountryMetrics = (filters = window.dashboardFilters) => {
+            const modifier = window.getElectionModifier(filters?.election);
+            const baseList = window.dashboardData.baseCountries;
+            const selectedCountries = Array.isArray(filters?.countries)
+                ? filters.countries.filter(Boolean)
+                : [];
+
+            let selected = selectedCountries.length
+                ? baseList.filter(item => selectedCountries.includes(item.name))
+                : baseList.slice(0, 12);
+
+            if (!selected.length) {
+                selected = baseList.slice(0, 12);
+            }
+
+            const adjustedList = selected.map(item => {
+                const isFocused = selectedCountries.includes(item.name);
+                const focusBoost = isFocused ? 1.05 : 1;
+                const turnout = clampValue(item.turnout * modifier * focusBoost, 20, 100);
+                const total = Math.round(item.total * (0.9 + modifier * 0.15) * focusBoost);
+                return {
+                    name: item.name,
+                    turnout: Number(turnout.toFixed(1)),
+                    total
+                };
+            });
+
+            const totalVoters = adjustedList.reduce((sum, item) => sum + item.total, 0) || 1;
+            const listWithShare = adjustedList.map(item => ({
+                ...item,
+                share: Number(((item.total / totalVoters) * 100).toFixed(1))
+            }));
+
+            const avgTurnout = listWithShare.reduce((sum, item) => sum + item.turnout, 0) / (listWithShare.length || 1);
+
+            return {
+                list: listWithShare,
+                totalVoters,
+                averageTurnout: Number(avgTurnout.toFixed(1))
+            };
+        };
+
+        window.cloneGeoJSON = (data) => {
+            if (!data) return null;
+            return typeof structuredClone === 'function'
+                ? structuredClone(data)
+                : JSON.parse(JSON.stringify(data));
+        };
+
+        window.getFilteredDatasetData = (stateKey, datasetKey, filters = window.dashboardFilters) => {
+            const stateData = window.stateDatasets[stateKey];
+            const dataset = stateData?.[datasetKey];
+            if (!dataset?.data) return null;
+
+            const cloned = window.cloneGeoJSON(dataset.data);
+            const electionModifier = window.getElectionModifier(filters.election);
+            const countryImpact = filters.countries?.length ? 1 + (filters.countries.length * 0.012) : 1;
+            const combinedModifier = electionModifier * countryImpact;
+
+            cloned.features = cloned.features.map(feature => {
+                const updated = window.cloneGeoJSON(feature);
+                const props = updated.properties || {};
+                const baseRegistered = props.registered ?? props.total ?? 0;
+                const registered = baseRegistered ? Math.round(baseRegistered * (0.9 + combinedModifier * 0.15)) : baseRegistered;
+                const baseTurnout = props.turnout ?? (props.voted && baseRegistered ? (props.voted / baseRegistered) * 100 : 60);
+                const turnout = clampValue(baseTurnout * combinedModifier, 15, 99);
+                const voted = registered ? Math.round(registered * (turnout / 100)) : props.voted ?? 0;
+
+                updated.properties = {
+                    ...props,
+                    turnout: Number(turnout.toFixed(1)),
+                    registered,
+                    voted,
+                    nonVoters: registered && voted ? Math.max(registered - voted, 0) : undefined
+                };
+
+                return updated;
+            });
+
+            return cloned;
+        };
+
+        window.computeStateStats = (stateKey, filters = window.dashboardFilters, countryMetrics = null) => {
+            const baseStats = window.stateBaseStats[stateKey];
+            if (!baseStats) {
+                return {
+                    registeredTotal: 0,
+                    turnoutAverage: 0,
+                    newRegistrations: 0,
+                    activeAreas: 0
+                };
+            }
+
+            const electionModifier = window.getElectionModifier(filters.election);
+            const avgCountryTurnout = countryMetrics?.averageTurnout || baseStats.turnoutAverage;
+            const countryModifier = avgCountryTurnout ? clampValue(avgCountryTurnout / 75, 0.7, 1.25) : 1;
+            const combined = electionModifier * countryModifier;
+
+            const registeredTotal = Math.round(baseStats.registeredTotal * (0.92 + combined * 0.18));
+            const turnoutAverage = clampValue(baseStats.turnoutAverage * (0.85 + combined * 0.18), 35, 96);
+            const newRegistrations = Math.round(baseStats.newRegistrations * (0.9 + combined * 0.2));
+            const activeAreas = Math.round(baseStats.activeAreas * (0.9 + electionModifier * 0.15));
+
+            return {
+                registeredTotal,
+                turnoutAverage: Number(turnoutAverage.toFixed(1)),
+                newRegistrations,
+                activeAreas
+            };
+        };
+
+        window.computeTopJurisdictions = (stateKey, filters = window.dashboardFilters) => {
+            const data = window.getFilteredDatasetData(stateKey, filters.jurisdiction, filters);
+            if (!data?.features?.length) return [];
+
+            const sorted = data.features
+                .map(feature => ({
+                    name: feature.properties?.name || 'Unknown',
+                    voted: feature.properties?.voted ?? 0,
+                    registered: feature.properties?.registered ?? 0
+                }))
+                .sort((a, b) => (b.voted || b.registered) - (a.voted || a.registered));
+
+            const top = sorted.slice(0, 5);
+            const maxValue = top[0]?.voted || top[0]?.registered || 1;
+
+            return top.map(item => ({
+                label: item.name,
+                value: item.voted || item.registered,
+                pct: maxValue ? clampValue(Math.round(((item.voted || item.registered) / maxValue) * 100), 5, 100) : 0
+            }));
+        };
+
+        window.computeGaugeMetrics = (stateStats) => {
+            const turnout = stateStats?.turnoutAverage ?? 0;
+            const totalEligible = stateStats?.registeredTotal ?? 0;
+            const totalVoted = Math.round(totalEligible * (turnout / 100));
+
+            return {
+                turnout: Number(turnout.toFixed(1)),
+                totalEligible,
+                totalVoted
+            };
+        };
+
+        window.dashboardMetrics = {
+            filters: { ...window.dashboardFilters },
+            stats: null,
+            gauge: null,
+            countries: null,
+            topJurisdictions: []
+        };
+
+        window.applyDashboardFilters = (overrideFilters = {}) => {
+            window.dashboardFilters = {
+                ...window.dashboardFilters,
+                ...overrideFilters
+            };
+
+            const filters = window.dashboardFilters;
+            window.dashboardMetrics.filters = { ...filters };
+
+            window.currentStateKey = filters.state;
+            window.updateStateMap(filters.state, filters);
+            window.updateStateStats(filters.state, filters, window.dashboardMetrics);
+
+            if (window.turnoutBarChart) {
+                const modifiers = window.dashboardData.electionModifiers;
+                const allElections = ['Aug 2025', 'Nov 2024', 'Aug 2024', 'Feb 2024', 'Nov 2023', 'Aug 2023'];
+                const baseline = [60, 74, 68, 58, 66, 61];
+                window.turnoutBarChart.data.datasets[0].data = allElections.map((key, idx) => {
+                    const base = baseline[idx] || 60;
+                    const modifier = modifiers[key] ?? 1;
+                    return Math.round(base * modifier);
+                });
+                window.turnoutBarChart.data.datasets[0].backgroundColor = allElections.map(election =>
+                    election === filters.election ? '#1d4ed8' : '#2563eb'
+                );
+                window.turnoutBarChart.update();
+            }
+
+            if (window.choroplethMapInstance) {
+                const datasetKey = filters.jurisdiction;
+                const stateData = window.stateDatasets[filters.state];
+                if (stateData?.[datasetKey]) {
+                    const source = window.choroplethMapInstance.getSource('voter-data');
+                    if (source) {
+                        const filteredGeoJson = window.getFilteredDatasetData(filters.state, datasetKey, filters);
+                        source.setData(filteredGeoJson);
+                    }
+                }
+            }
+
+            if (window.expandedMapInstance) {
+                const datasetKey = filters.jurisdiction;
+                const stateData = window.stateDatasets[filters.state];
+                if (stateData?.[datasetKey]) {
+                    const source = window.expandedMapInstance.getSource('voter-data');
+                    if (source) {
+                        const filteredGeoJson = window.getFilteredDatasetData(filters.state, datasetKey, filters);
+                        source.setData(filteredGeoJson);
+                    }
+                }
+            }
+
+            const filtersEvent = new CustomEvent('dashboard:update', {
+                detail: {
+                    filters: { ...filters },
+                    metrics: { ...window.dashboardMetrics }
+                }
+            });
+            window.dispatchEvent(filtersEvent);
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            window.applyDashboardFilters({});
+        });
+
         window.stateDatasets = {
             WA: {
                 Counties: {
@@ -2599,54 +2817,106 @@
         window.choroplethMapInstance = null;
         window.expandedMapInstance = null;
 
-        window.updateStateStats = (stateKey) => {
+        window.updateStateStats = (stateKey, filters = window.dashboardFilters, metrics = window.dashboardMetrics) => {
             const config = window.stateConfigs[stateKey];
-            if (!config?.stats) return;
+            if (!config) return;
 
-            const { registeredTotal, turnoutAverage, newRegistrations, activeAreas, topJurisdictions } = config.stats;
+            const countryMetrics = metrics?.countries || window.computeCountryMetrics(filters);
+            const stateStats = window.computeStateStats(stateKey, filters, countryMetrics);
+            const { registeredTotal, turnoutAverage, newRegistrations, activeAreas } = stateStats;
 
             const registeredEl = document.querySelector('[data-stat="registered-total"]');
-            if (registeredEl) registeredEl.textContent = registeredTotal.toLocaleString();
+            if (registeredEl) registeredEl.textContent = registeredTotal?.toLocaleString() ?? '0';
 
             const turnoutEl = document.querySelector('[data-stat="turnout-average"]');
-            if (turnoutEl) turnoutEl.textContent = `${turnoutAverage}%`;
+            if (turnoutEl) turnoutEl.textContent = `${(turnoutAverage ?? 0)}%`;
 
             const newRegEl = document.querySelector('[data-stat="new-registrations"]');
-            if (newRegEl) newRegEl.textContent = newRegistrations.toLocaleString();
+            if (newRegEl) newRegEl.textContent = newRegistrations?.toLocaleString() ?? '0';
 
             const activeAreasEl = document.querySelector('[data-stat="active-areas"]');
-            if (activeAreasEl) activeAreasEl.textContent = activeAreas.toLocaleString();
+            if (activeAreasEl) activeAreasEl.textContent = activeAreas?.toLocaleString() ?? '0';
 
-            if (Array.isArray(topJurisdictions)) {
-                const maxValue = topJurisdictions[0]?.value || 1;
-                topJurisdictions.forEach(({ label, value }, index) => {
-                    const valueEl = document.querySelector(`[data-stat="top-jurisdiction-${index}"]`);
-                    if (valueEl) valueEl.textContent = value.toLocaleString();
+            const topJurisdictions = window.computeTopJurisdictions(stateKey, filters);
+            topJurisdictions.forEach(({ label, value, pct }, index) => {
+                const valueEl = document.querySelector(`[data-stat="top-jurisdiction-${index}"]`);
+                if (valueEl) valueEl.textContent = value?.toLocaleString() ?? '0';
 
-                    const labelEl = document.querySelector(`[data-top-label="${index}"]`);
-                    if (labelEl) labelEl.textContent = label;
+                const labelEl = document.querySelector(`[data-top-label="${index}"]`);
+                if (labelEl) labelEl.textContent = label ?? '—';
 
-                    const progressEl = document.querySelector(`[data-top-progress="${index}"]`);
-                    if (progressEl) {
-                        const pct = Math.max(10, Math.round((value / maxValue) * 100));
-                        progressEl.style.width = `${Math.min(pct, 100)}%`;
-                    }
-                });
+                const progressEl = document.querySelector(`[data-top-progress="${index}"]`);
+                if (progressEl) {
+                    progressEl.style.width = `${pct ?? 0}%`;
+                }
+            });
+
+            const gaugeMetrics = window.computeGaugeMetrics(stateStats);
+            window.dashboardMetrics = {
+                filters: { ...filters },
+                stats: stateStats,
+                gauge: gaugeMetrics,
+                countries: countryMetrics,
+                topJurisdictions
+            };
+
+            const gaugeWidget = document.querySelector('[x-data^="turnoutGaugeWidget"]');
+            if (gaugeWidget && gaugeWidget.__x) {
+                gaugeWidget.__x.$data.turnout = gaugeMetrics.turnout;
+                gaugeWidget.__x.$data.totalEligible = gaugeMetrics.totalEligible;
+                gaugeWidget.__x.$data.totalVoted = gaugeMetrics.totalVoted;
             }
+
+            const option1Widget = document.querySelector('[x-data*="sortedCountries"]');
+            if (option1Widget && option1Widget.__x) {
+                const countriesList = countryMetrics.list ?? [];
+                option1Widget.__x.$data.countries = countriesList.map(item => ({
+                    name: item.name,
+                    turnout: item.turnout,
+                    total: item.total,
+                    share: item.share
+                }));
+            }
+
+            if (window.ethnicityChart && countryMetrics.list.length) {
+                const chartData = countryMetrics.list.map(item => item.share);
+                const chartLabels = countryMetrics.list.map(item => item.name);
+                window.ethnicityChart.data.labels = chartLabels;
+                window.ethnicityChart.data.datasets[0].data = chartData;
+                window.ethnicityChart.update();
+            }
+
+            if (window.futuristicCountryChart && countryMetrics.list.length) {
+                const list = countryMetrics.list;
+                window.futuristicCountryChart.data.labels = list.map(item => item.name);
+                window.futuristicCountryChart.data.datasets[0].data = list.map(item => item.turnout);
+                window.futuristicCountryChart.data.datasets[0].totalValues = list.map(item => item.total);
+                window.futuristicCountryChart.update();
+            }
+
+            const topList = topJurisdictions;
+            topList.forEach((item, index) => {
+                const labelEl = document.querySelector(`[data-top-label="${index}"]`);
+                if (labelEl) labelEl.textContent = item.label;
+                const valueEl = document.querySelector(`[data-stat="top-jurisdiction-${index}"]`);
+                if (valueEl) valueEl.textContent = item.value.toLocaleString();
+                const progressEl = document.querySelector(`[data-top-progress="${index}"]`);
+                if (progressEl) progressEl.style.width = `${item.pct}%`;
+            });
         };
 
-        window.updateStateMap = (stateKey) => {
+        window.updateStateMap = (stateKey, filters = window.dashboardFilters) => {
             const stateData = window.stateDatasets[stateKey];
             if (!stateData) return;
 
             window.choroplethDatasets = stateData;
 
-            if (window.currentDatasetKey && stateData[window.currentDatasetKey]) {
-                if (window.updateChoroplethView) {
-                    window.updateChoroplethView(window.currentDatasetKey);
-                }
-            } else if (window.updateChoroplethView) {
-                window.updateChoroplethView('Counties');
+            const datasetKey = filters.jurisdiction && stateData[filters.jurisdiction]
+                ? filters.jurisdiction
+                : 'Counties';
+
+            if (window.updateChoroplethView) {
+                window.updateChoroplethView(datasetKey);
             }
 
             const config = window.stateConfigs[stateKey];
@@ -2687,6 +2957,8 @@
                 subtitle: 'November 2024 | Top 10 Counties',
                 datasetKey: 'Counties',
                 legend: null,
+                mapReady: false,
+                pendingDatasetKey: null,
                 init() {
                     if (!window.mapboxgl || !mapboxgl.accessToken) {
                         console.warn('Mapbox token missing or MapboxGL not loaded');
@@ -2700,16 +2972,23 @@
                     const mapInstance = new mapboxgl.Map({
                         container: containerId,
                         style: 'mapbox://styles/mapbox/light-v11',
-                        center: [-120.740135, 47.751076],
-                        zoom: 6,
+                        center: [-98.5795, 39.8283],
+                        zoom: 4,
                         pitch: 0,
                         bearing: 0,
                         antialias: true
                     });
 
+                    const usBounds = [[-130.0, 20.0], [-60.0, 55.0]];
+                    mapInstance.setMaxBounds(usBounds);
+                    mapInstance.dragRotate.disable();
+                    mapInstance.touchZoomRotate.disableRotation();
+                    mapInstance.setProjection('mercator');
+
                     mapInstance.on('load', () => {
-                        this.datasetKey = window.currentDatasetKey || this.datasetKey;
-                        this.loadDataset(mapInstance, this.datasetKey);
+                        this.mapReady = true;
+                        const targetKey = this.pendingDatasetKey || window.currentDatasetKey || this.datasetKey;
+                        this.loadDataset(mapInstance, targetKey);
                         mapInstance.addControl(new mapboxgl.NavigationControl(), 'top-right');
                     });
 
@@ -2726,6 +3005,18 @@
                     }
                 },
                 loadDataset(mapInstance, key) {
+                    if (!mapInstance || typeof mapInstance.isStyleLoaded !== 'function') return;
+                    if (!mapInstance.isStyleLoaded()) {
+                        this.pendingDatasetKey = key;
+                        mapInstance.once('styledata', () => {
+                            if (this.pendingDatasetKey === key) {
+                                this.pendingDatasetKey = null;
+                                this.loadDataset(mapInstance, key);
+                            }
+                        });
+                        return;
+                    }
+
                     const dataSources = window.choroplethDatasets || {};
                     const dataset = dataSources[key] || dataSources['Counties'];
                     if (!dataset) return;
@@ -2743,9 +3034,18 @@
                     if (mapInstance.getLayer(layerId)) mapInstance.removeLayer(layerId);
                     if (mapInstance.getSource(sourceId)) mapInstance.removeSource(sourceId);
 
+                    const filters = {
+                        state: window.dashboardFilters?.state || window.currentStateKey,
+                        election: window.dashboardFilters?.election || 'Nov 2024',
+                        jurisdiction: key,
+                        countries: window.dashboardFilters?.countries || []
+                    };
+
+                    const filteredData = window.getFilteredDatasetData(filters.state, key, filters) || dataset.data;
+
                     mapInstance.addSource(sourceId, {
                         type: 'geojson',
-                        data: dataset.data
+                        data: filteredData
                     });
 
                     mapInstance.addLayer({
@@ -2815,15 +3115,22 @@
                     }
                 },
                 initializeExpandedMap(initialKey) {
+                    const stateConfig = window.stateConfigs[window.currentStateKey];
                     const mapInstance = new mapboxgl.Map({
                         container: 'expanded-map',
                         style: 'mapbox://styles/mapbox/light-v11',
-                        center: window.stateConfigs[window.currentStateKey]?.center || [-120.740135, 47.751076],
-                        zoom: window.stateConfigs[window.currentStateKey]?.zoom || 6,
+                        center: stateConfig?.center || [-98.5795, 39.8283],
+                        zoom: stateConfig?.zoom || 4,
                         pitch: 0,
                         bearing: 0,
                         antialias: true
                     });
+
+                    const usBounds = [[-130.0, 20.0], [-60.0, 55.0]];
+                    mapInstance.setMaxBounds(usBounds);
+                    mapInstance.dragRotate.disable();
+                    mapInstance.touchZoomRotate.disableRotation();
+                    mapInstance.setProjection('mercator');
 
                     mapInstance.on('load', () => {
                         mapInstance.addControl(new mapboxgl.NavigationControl(), 'top-right');
@@ -2865,7 +3172,7 @@
 
             Alpine.data('stateSelector', () => ({
                 open: false,
-                selectedKey: window.currentStateKey,
+                selectedKey: window.dashboardFilters?.state || window.currentStateKey,
                 get selectedLabel() {
                     return window.stateConfigs[this.selectedKey]?.label || 'Select state';
                 },
@@ -2875,8 +3182,11 @@
                     abbr: config.abbr
                 })),
                 init() {
-                    window.updateStateStats(this.selectedKey);
-                    window.updateStateMap(this.selectedKey);
+                    window.addEventListener('dashboard:update', (event) => {
+                        if (event.detail?.filters?.state) {
+                            this.selectedKey = event.detail.filters.state;
+                        }
+                    });
                 },
                 toggle() {
                     this.open = !this.open;
@@ -2891,15 +3201,13 @@
                     }
 
                     this.selectedKey = stateKey;
-                    window.currentStateKey = stateKey;
-                    window.updateStateStats(stateKey);
-                    window.updateStateMap(stateKey);
+                    window.applyDashboardFilters?.({ state: stateKey });
                     this.close();
                 }
             }));
         })
 
-        function turnoutGaugeWidget(initialTurnout, totalEligible, totalVoted) {
+        function turnoutGaugeWidget(initialTurnout = 53, totalEligible = 61821, totalVoted = 32795) {
             const radius = 80;
             const circumference = Math.PI * radius;
 
@@ -3053,309 +3361,8 @@
         // Initialize Lucide icons
         lucide.createIcons();
 
-        // Initialize Mapbox
+        // Set Mapbox access token (used by Alpine component)
         mapboxgl.accessToken = 'pk.eyJ1Ijoic2FqYS1yIiwiYSI6ImNtZXRjaHhiajAwcjgya3B5cjJqaDljZGwifQ.o1uEOA7pV2RB_0A8jicwqg';
-        
-        try {
-            const map = new mapboxgl.Map({
-                container: 'map',
-                style: 'mapbox://styles/mapbox/light-v11',
-                center: [-120.740135, 47.751076],
-                zoom: 6,
-                pitch: 0,
-                bearing: 0,
-                antialias: true
-            });
-
-            // Sample GeoJSON data for Washington counties
-            const sampleData = {
-                'type': 'FeatureCollection',
-                'features': [
-                    {
-                        'type': 'Feature',
-                        'properties': {
-                            'name': 'King County',
-                            'voter_count': 89450,
-                            'turnout': 76
-                        },
-                        'geometry': {
-                            'type': 'Polygon',
-                            'coordinates': [[[-122.5, 47.4], [-122.5, 47.8], [-121.8, 47.8], [-121.8, 47.4], [-122.5, 47.4]]]
-                        }
-                    },
-                    {
-                        'type': 'Feature',
-                        'properties': {
-                            'name': 'Pierce County',
-                            'voter_count': 45230,
-                            'turnout': 72
-                        },
-                        'geometry': {
-                            'type': 'Polygon',
-                            'coordinates': [[[-122.8, 47.0], [-122.8, 47.4], [-122.1, 47.4], [-122.1, 47.0], [-122.8, 47.0]]]
-                        }
-                    },
-                    {
-                        'type': 'Feature',
-                        'properties': {
-                            'name': 'Snohomish County',
-                            'voter_count': 72340,
-                            'turnout': 74
-                        },
-                        'geometry': {
-                            'type': 'Polygon',
-                            'coordinates': [[[-122.3, 47.8], [-122.3, 48.2], [-121.6, 48.2], [-121.6, 47.8], [-122.3, 47.8]]]
-                        }
-                    },
-                    {
-                        'type': 'Feature',
-                        'properties': {
-                            'name': 'Spokane County',
-                            'voter_count': 35780,
-                            'turnout': 68
-                        },
-                        'geometry': {
-                            'type': 'Polygon',
-                            'coordinates': [[[-117.8, 47.4], [-117.8, 47.8], [-117.2, 47.8], [-117.2, 47.4], [-117.8, 47.4]]]
-                        }
-                    },
-                    {
-                        'type': 'Feature',
-                        'properties': {
-                            'name': 'Clark County',
-                            'voter_count': 42560,
-                            'turnout': 70
-                        },
-                        'geometry': {
-                            'type': 'Polygon',
-                            'coordinates': [[[-122.7, 45.6], [-122.7, 45.9], [-122.2, 45.9], [-122.2, 45.6], [-122.7, 45.6]]]
-                        }
-                    },
-                    {
-                        'type': 'Feature',
-                        'properties': {
-                            'name': 'Thurston County',
-                            'voter_count': 28900,
-                            'turnout': 69
-                        },
-                        'geometry': {
-                            'type': 'Polygon',
-                            'coordinates': [[[-123.1, 46.7], [-123.1, 47.0], [-122.6, 47.0], [-122.6, 46.7], [-123.1, 46.7]]]
-                        }
-                    },
-                    {
-                        'type': 'Feature',
-                        'properties': {
-                            'name': 'Whatcom County',
-                            'voter_count': 25670,
-                            'turnout': 71
-                        },
-                        'geometry': {
-                            'type': 'Polygon',
-                            'coordinates': [[[-122.8, 48.7], [-122.8, 49.0], [-122.1, 49.0], [-122.1, 48.7], [-122.8, 48.7]]]
-                        }
-                    },
-                    {
-                        'type': 'Feature',
-                        'properties': {
-                            'name': 'Yakima County',
-                            'voter_count': 18450,
-                            'turnout': 65
-                        },
-                        'geometry': {
-                            'type': 'Polygon',
-                            'coordinates': [[[-120.9, 46.3], [-120.9, 46.7], [-120.2, 46.7], [-120.2, 46.3], [-120.9, 46.3]]]
-                        }
-                    },
-                    {
-                        'type': 'Feature',
-                        'properties': {
-                            'name': 'Kitsap County',
-                            'voter_count': 31240,
-                            'turnout': 73
-                        },
-                        'geometry': {
-                            'type': 'Polygon',
-                            'coordinates': [[[-123.0, 47.4], [-123.0, 47.8], [-122.5, 47.8], [-122.5, 47.4], [-123.0, 47.4]]]
-                        }
-                    },
-                    {
-                        'type': 'Feature',
-                        'properties': {
-                            'name': 'Benton County',
-                            'voter_count': 22890,
-                            'turnout': 67
-                        },
-                        'geometry': {
-                            'type': 'Polygon',
-                            'coordinates': [[[-119.6, 46.0], [-119.6, 46.3], [-119.0, 46.3], [-119.0, 46.0], [-119.6, 46.0]]]
-                        }
-                    }
-                ]
-            };
-
-            // Handle map modal
-            let expandedMap = null;
-
-            // Watch for modal open/close
-            document.addEventListener('alpine:initialized', () => {
-                Alpine.data('mapModal', () => ({
-                    open: false,
-                    init() {
-                        this.$watch('open', value => {
-                            if (value && !expandedMap && map) {
-                                // Create expanded map when modal opens
-                        expandedMap = new mapboxgl.Map({
-                            container: 'expanded-map',
-                            style: 'mapbox://styles/mapbox/light-v11',
-                            center: map.getCenter(),
-                            zoom: map.getZoom(),
-                            pitch: 0,
-                            bearing: 0,
-                            antialias: true
-                        });
-
-                                // Copy the data source and layer from the main map
-                        expandedMap.on('load', () => {
-                            expandedMap.addSource('voter-data', {
-                                'type': 'geojson',
-                                'data': sampleData
-                            });
-
-                            expandedMap.addLayer({
-                                'id': 'voter-choropleth',
-                                'type': 'fill',
-                                'source': 'voter-data',
-                                'paint': {
-                                    'fill-color': [
-                                        'interpolate',
-                                        ['linear'],
-                                        ['get', 'voter_count'],
-                                                0, '#ef4444',
-                                                20000, '#f59e0b',
-                                                40000, '#fbbf24',
-                                                60000, '#84cc16',
-                                                80000, '#22c55e'
-                                    ],
-                                    'fill-opacity': 0.7,
-                                    'fill-outline-color': '#ffffff'
-                                }
-                            });
-                                });
-                            } else if (!value && expandedMap) {
-                                // Clean up map when modal closes
-                                expandedMap.remove();
-                                expandedMap = null;
-                            }
-                        });
-                    }
-                }));
-            });
-
-            map.on('load', () => {
-                // Ensure terrain and 3D features are disabled
-                map.setTerrain(null);
-                
-                // Add the data source
-                map.addSource('voter-data', {
-                    'type': 'geojson',
-                    'data': sampleData
-                });
-
-                // Add choropleth layer
-                map.addLayer({
-                    'id': 'voter-choropleth',
-                    'type': 'fill',
-                    'source': 'voter-data',
-                    'paint': {
-                        'fill-color': [
-                            'interpolate',
-                            ['linear'],
-                            ['get', 'voter_count'],
-                            0, '#ef4444',      // Red for low numbers
-                            20000, '#f59e0b',  // Orange-yellow for low-medium
-                            40000, '#fbbf24',  // Yellow for medium
-                            60000, '#84cc16',  // Light green for medium-high
-                            80000, '#22c55e'   // Green for high numbers
-                        ],
-                        'fill-opacity': 0.7,
-                        'fill-outline-color': '#ffffff'
-                    }
-                });
-
-                // Add hover effect
-                map.addLayer({
-                    'id': 'voter-choropleth-hover',
-                    'type': 'line',
-                    'source': 'voter-data',
-                    'paint': {
-                        'line-color': '#ffffff',
-                        'line-width': 2
-                    },
-                    'filter': ['==', ['get', 'name'], '']
-                });
-
-                // Add popup on hover
-                const popup = new mapboxgl.Popup({
-                    closeButton: false,
-                    closeOnClick: false
-                });
-
-                map.on('mousemove', 'voter-choropleth', (e) => {
-                    if (e.features.length > 0) {
-                        const feature = e.features[0];
-                        
-                        // Update hover effect
-                        map.setFilter('voter-choropleth-hover', ['==', ['get', 'name'], feature.properties.name]);
-                        
-                        // Show popup
-                        popup.setLngLat(e.lngLat)
-                            .setHTML(`
-                                <div class="p-2">
-                                    <h4 class="font-medium">${feature.properties.name}</h4>
-                                    <p class="text-sm">Registered Voters: ${feature.properties.voter_count.toLocaleString()}</p>
-                                    <p class="text-sm">Turnout: ${feature.properties.turnout}%</p>
-                                </div>
-                            `)
-                            .addTo(map);
-                    }
-                });
-
-                map.on('mouseleave', 'voter-choropleth', () => {
-                    map.setFilter('voter-choropleth-hover', ['==', ['get', 'name'], '']);
-                    popup.remove();
-                });
-
-                // No 3D buildings for flat map
-            });
-
-            map.on('error', (e) => {
-                console.error('Map error:', e);
-                document.getElementById('map').innerHTML = `
-                    <div class="flex items-center justify-center h-full bg-surface-2 rounded-lg">
-                        <div class="text-center p-4">
-                            <i data-lucide="map-off" class="w-8 h-8 mx-auto mb-2 text-text-secondary"></i>
-                            <p class="text-text-secondary">Map loading error. Please check your connection.</p>
-                        </div>
-                    </div>
-                `;
-            });
-        } catch (error) {
-            console.error('Map initialization error:', error);
-            document.getElementById('map').innerHTML = `
-                <div class="flex items-center justify-center h-full bg-surface-2 rounded-lg">
-                    <div class="text-center p-4">
-                        <i data-lucide="map-off" class="w-8 h-8 mx-auto mb-2 text-text-secondary"></i>
-                        <p class="text-text-secondary">Unable to load map. Please check your API key.</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Add navigation controls if map is initialized
-        if (map && typeof map.addControl === 'function') {
-            map.addControl(new mapboxgl.NavigationControl());
-        }
 
         // Initialize Charts
         // Date range picker modal
@@ -3482,27 +3489,23 @@
 
         const futuristicCtx = document.getElementById('turnoutBarChart');
         if (futuristicCtx) {
-            const countryLabels = ['Morocco', 'Kashmir', 'India', 'Egypt', 'American', 'Turkey', 'Bosnia & Herzegovina', 'Palestine', 'Pakistan', 'Bangladesh', 'Sudan', 'Syria', 'Iraq', 'Iran', 'Cham', 'Eritrea', 'Lebanon', 'Afghanistan', 'Ethiopia', 'Somalia'];
-            const turnoutValues = [100.0, 88.9, 82.3, 80.0, 74.9, 69.0, 68.9, 68.7, 68.2, 66.9, 59.8, 58.3, 55.6, 55.5, 55.2, 50.2, 44.2, 41.4, 41.2, 29.1];
-            const totalValues = [18, 20, 214, 116, 892, 3716, 5678, 1432, 2891, 1567, 789, 654, 987, 1234, 432, 321, 876, 543, 765, 234];
+            const baseGradient = futuristicCtx.getContext('2d').createLinearGradient(0, 0, 0, 320);
+            baseGradient.addColorStop(0, 'rgba(59, 130, 246, 0.95)');
+            baseGradient.addColorStop(1, 'rgba(14, 165, 233, 0.45)');
 
-            new Chart(futuristicCtx, {
+            window.futuristicCountryChart = new Chart(futuristicCtx, {
                 type: 'bar',
             data: {
-                    labels: countryLabels,
+                    labels: [],
                 datasets: [{
                         label: 'Turnout %',
-                        data: turnoutValues,
-                        backgroundColor: ctx => {
-                            const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 320);
-                            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.95)');
-                            gradient.addColorStop(1, 'rgba(14, 165, 233, 0.45)');
-                            return gradient;
-                        },
+                        data: [],
+                        backgroundColor: baseGradient,
                         borderRadius: 12,
                         barPercentage: 0.6,
                         categoryPercentage: 0.6,
-                        hoverBackgroundColor: '#2563eb'
+                        hoverBackgroundColor: '#2563eb',
+                        totalValues: []
                 }]
             },
             options: {
@@ -3510,15 +3513,10 @@
                 maintainAspectRatio: false,
                     scales: {
                         x: {
-                            grid: {
-                                display: false
-                            },
+                            grid: { display: false },
                             ticks: {
                             color: '#4b5563',
-                            font: {
-                                family: "'Inter', sans-serif",
-                                    size: 11
-                                }
+                                font: { family: "'Inter', sans-serif", size: 11 }
                             }
                         },
                         y: {
@@ -3530,41 +3528,34 @@
                             },
                             ticks: {
                                 color: '#4b5563',
-                                font: {
-                                    family: "'Inter', sans-serif",
-                                    size: 11
-                                },
+                                font: { family: "'Inter', sans-serif", size: 11 },
                                 callback: value => value + '%'
                             }
                         }
                     },
                     plugins: {
-                        legend: {
-                            display: false
-                    },
-                    tooltip: {
+                        legend: { display: false },
+                        tooltip: {
                             backgroundColor: '#0f172a',
-                        titleFont: {
-                            family: "'Inter', sans-serif",
-                                size: 13,
-                            weight: '600'
-                        },
-                        bodyFont: {
-                            family: "'Inter', sans-serif",
-                                size: 12
-                        },
+                            titleFont: { family: "'Inter', sans-serif", size: 13, weight: '600' },
+                            bodyFont: { family: "'Inter', sans-serif", size: 12 },
                         padding: 12,
                             cornerRadius: 10,
                         callbacks: {
                                 label: context => {
-                                    const index = context.dataIndex;
-                                    return [`Turnout: ${context.parsed.y}%`, `Total Voters: ${totalValues[index].toLocaleString()}`];
+                                    const dataset = context.dataset;
+                                    const totalValues = dataset.totalValues || [];
+                                    const total = totalValues[context.dataIndex];
+                                    return [
+                                        `Turnout: ${context.parsed.y}%`,
+                                        total != null ? `Total Voters: ${Number(total).toLocaleString()}` : null
+                                    ].filter(Boolean);
+                                }
                             }
                         }
                     }
-                    }
-            }
-        });
+                }
+            });
         }
 
 
