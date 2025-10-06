@@ -582,10 +582,11 @@
                             <div 
                                 x-show="modalOpen"
                                 x-transition.opacity
-                                class="fixed inset-0 z-50 bg-black/60 backdrop-blur flex items-center justify-center p-4"
+                                class="fixed inset-0 z-50 bg-black/60 backdrop-blur flex items-center justify-center md:p-4"
                                 style="display:none">
-                                <div class="bg-white w-full h-[90vh] rounded-2xl shadow-2xl border border-white/60 overflow-hidden relative">
-                                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                                <div class="bg-white w-full md:h-[90vh] h-full md:rounded-2xl shadow-2xl border border-white/60 overflow-hidden relative">
+                                    <!-- Header - hidden on mobile, visible on desktop -->
+                                    <div class="hidden md:flex items-center justify-between px-6 py-4 border-b border-gray-100">
                                         <div>
                                             <h3 class="text-lg font-semibold text-gray-900" x-text="title"></h3>
                                             <p class="text-xs text-gray-500" x-text="subtitle"></p>
@@ -604,13 +605,19 @@
                                                     <span>High</span>
                                                 </div>
                                             </div>
-                                    <button 
+                                            <button 
                                                 @click="closeModal"
-                                                class="p-2 text-gray-500 hover:text-gray-700 bg-white rounded-full border border-gray-200 shadow-sm">
-                                                <i data-lucide="x" class="w-6 h-6"></i>
+                                                class="p-2.5 text-white bg-red-500 hover:bg-red-600 rounded-full shadow-md transition-all hover:scale-110">
+                                                <i data-lucide="x" class="w-5 h-5"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <!-- Mobile close button - positioned as overlay -->
+                                    <button 
+                                        @click="closeModal"
+                                        class="md:hidden absolute top-4 right-4 z-[60] p-2.5 text-white bg-red-500 hover:bg-red-600 rounded-full shadow-lg transition-all hover:scale-110">
+                                        <i data-lucide="x" class="w-5 h-5"></i>
                                     </button>
-                                </div>
-                                </div>
                                     <div id="expanded-map" class="w-full h-full"></div>
                             </div>
                         </div>
@@ -727,208 +734,11 @@
                         </div>
                     </div>
 
-                    <div class="lg:col-span-4 card p-4" x-data="{
-                        sortBy: 'turnout',
-                        view: 'grid', // 'grid' or 'list'
-                        countries: [
-                            { name: 'Morocco', turnout: 100.0 },
-                            { name: 'Kashmir', turnout: 88.9 },
-                            { name: 'India', turnout: 82.3 },
-                            { name: 'Egypt', turnout: 80.0 },
-                            { name: 'American', turnout: 74.9 },
-                            { name: 'Turkey', turnout: 69.0 },
-                            { name: 'Bosnia and Herzegovina', turnout: 68.9 },
-                            { name: 'Palestine', turnout: 68.7 },
-                            { name: 'Pakistan', turnout: 68.2 },
-                            { name: 'Bangladesh', turnout: 66.9 },
-                            { name: 'Sudan', turnout: 59.8 },
-                            { name: 'Syria', turnout: 58.3 },
-                            { name: 'Iraq', turnout: 55.6 },
-                            { name: 'Iran', turnout: 55.5 },
-                            { name: 'Cham', turnout: 55.2 },
-                            { name: 'Eritrea', turnout: 50.2 },
-                            { name: 'Lebanon', turnout: 44.2 },
-                            { name: 'Afghanistan', turnout: 41.4 },
-                            { name: 'Ethiopia', turnout: 41.2 },
-                            { name: 'Somalia', turnout: 29.1 }
-                        ],
-                        get sortedCountries() {
-                            return [...this.countries].sort((a, b) => 
-                                this.sortBy === 'name' 
-                                    ? a.name.localeCompare(b.name)
-                                    : b.turnout - a.turnout
-                            );
-                        },
-                        getTurnoutColor(turnout) {
-                            if (turnout >= 80) return 'bg-emerald-500';
-                            if (turnout >= 60) return 'bg-blue-500';
-                            if (turnout >= 40) return 'bg-amber-500';
-                            return 'bg-rose-500';
-                        }
-                    }">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="font-medium">Voter Turnout by Country of Origin (option 1)</h3>
-                            <div class="flex items-center gap-3">
-                                <button 
-                                    @click="view = 'grid'" 
-                                    class="p-1.5 rounded-md transition-colors"
-                                    :class="view === 'grid' ? 'bg-primary/10 text-primary' : 'text-gray-500 hover:text-primary'">
-                                    <i data-lucide="grid" class="w-4 h-4"></i>
-                                </button>
-                                <button 
-                                    @click="view = 'list'" 
-                                    class="p-1.5 rounded-md transition-colors"
-                                    :class="view === 'list' ? 'bg-primary/10 text-primary' : 'text-gray-500 hover:text-primary'">
-                                    <i data-lucide="list" class="w-4 h-4"></i>
-                                </button>
-                                <div class="h-4 w-px bg-gray-200 mx-1"></div>
-                                <button 
-                                    @click="sortBy = 'name'" 
-                                    class="p-1.5 rounded-md transition-colors"
-                                    :class="sortBy === 'name' ? 'bg-primary/10 text-primary' : 'text-gray-500 hover:text-primary'">
-                                    <i data-lucide="sort-asc" class="w-4 h-4"></i>
-                                </button>
-                                <button 
-                                    @click="sortBy = 'turnout'" 
-                                    class="p-1.5 rounded-md transition-colors"
-                                    :class="sortBy === 'turnout' ? 'bg-primary/10 text-primary' : 'text-gray-500 hover:text-primary'">
-                                    <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
-                                </button>
-                        </div>
-                    </div>
-
-                        <!-- Grid View -->
-                        <div x-show="view === 'grid'" class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[360px] overflow-y-auto pr-2">
-                            <template x-for="country in sortedCountries" :key="country.name">
-                                <div class="relative group">
-                                    <div class="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors">
-                                        <div class="flex items-center justify-between mb-2">
-                                            <span class="text-sm font-medium truncate" x-text="country.name"></span>
-                                            <span class="text-xs font-semibold px-2 py-0.5 rounded-full" 
-                                                  :class="getTurnoutColor(country.turnout)"
-                                                  x-text="country.turnout + '%'"></span>
-                </div>
-                                        <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                            <div class="h-full transition-all duration-500 ease-out rounded-full"
-                                                 :class="getTurnoutColor(country.turnout)"
-                                                 :style="'width: ' + country.turnout + '%'"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-
-                        <!-- List View -->
-                        <div x-show="view === 'list'" class="space-y-2 max-h-[360px] overflow-y-auto pr-2">
-                            <template x-for="country in sortedCountries" :key="country.name">
-                                <div class="flex items-center gap-4 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                                    <div class="flex-1">
-                                        <div class="flex items-center justify-between mb-1">
-                                            <span class="text-sm font-medium" x-text="country.name"></span>
-                                            <span class="text-xs font-semibold px-2 py-0.5 rounded-full" 
-                                                  :class="getTurnoutColor(country.turnout)"
-                                                  x-text="country.turnout + '%'"></span>
-                                        </div>
-                                        <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                            <div class="h-full transition-all duration-500 ease-out rounded-full"
-                                                 :class="getTurnoutColor(country.turnout)"
-                                                 :style="'width: ' + country.turnout + '%'"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-
-                    <!-- New Bar Graph Widget -->
-                    <div class="lg:col-span-6 card p-4" 
-                         x-data="turnoutChart()"
-                         x-init="initChart()">
-                        <script>
-                            document.addEventListener('alpine:init', () => {
-            Alpine.data('turnoutChart', () => ({
-                countries: [],
-                hoveredCountry: null,
-                showAll: false,
-                init() {
-                    const metrics = window.dashboardMetrics?.countries ?? window.computeCountryMetrics();
-                    this.countries = metrics.list || [];
-                    window.addEventListener('dashboard:update', (event) => {
-                        const list = event.detail?.metrics?.countries?.list;
-                        if (Array.isArray(list)) {
-                            this.countries = list;
-                        }
-                    });
-                },
-                getBarColor(turnout) {
-                    if (turnout >= 80) return 'rgb(16, 185, 129)';
-                    if (turnout >= 60) return 'rgb(59, 130, 246)';
-                    if (turnout >= 40) return 'rgb(245, 158, 11)';
-                    return 'rgb(239, 68, 68)';
-                },
-                formatNumber(num) {
-                    return new Intl.NumberFormat().format(num);
-                },
-                get displayedCountries() {
-                    return this.showAll ? this.countries : this.countries.slice(0, 10);
-                }
-            }));
-                            });
-                        </script>
-                    }">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="font-medium">Voter Turnout Distribution (option 2)</h3>
-                            <div class="flex items-center gap-2 text-xs text-gray-500">
-                                <span class="flex items-center gap-1">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                                    High Turnout
-                                </span>
-                                <span class="flex items-center gap-1">
-                                    <span class="w-2 h-2 rounded-full bg-rose-400"></span>
-                                    Low Turnout
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="space-y-3 max-h-[460px] overflow-y-auto pr-1">
-                            <template x-for="(country, index) in displayedCountries" :key="country.name">
-                                <div class="relative overflow-hidden rounded-xl border border-slate-200/60 bg-white/80 backdrop-blur-sm p-4 group hover:border-blue-500/40 hover:shadow-[0_15px_35px_-20px_rgba(37,99,235,0.55)] transition-all duration-200">
-                                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-blue-500/10 via-transparent to-transparent transition-opacity duration-200"></div>
-                                    <div class="relative flex items-center justify-between gap-4">
-                                        <div class="flex items-center gap-3">
-                                            <div class="h-10 w-10 rounded-xl bg-blue-100 text-blue-600 font-semibold grid place-items-center text-sm">
-                                                <span x-text="String(index + 1).padStart(2, '0')"></span>
-                                            </div>
-                                            <div>
-                                                <p class="text-sm font-semibold text-slate-800" x-text="country.name"></p>
-                                                <p class="text-xs text-slate-500" x-text="formatNumber(country.total) + ' voters'"></p>
-                                            </div>
-                                        </div>
-                                        <span class="text-sm font-semibold text-slate-600" x-text="country.turnout + '%'">
-                                        </span>
-                                    </div>
-                                    <div class="relative mt-3 h-2 rounded-full bg-slate-200/70 overflow-hidden">
-                                        <div class="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-sky-400 shadow-[0_0_18px_rgba(37,99,235,0.35)] transition-all duration-300"
-                                             :style="{ width: Math.min(country.turnout, 100) + '%' }"></div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                        
-                        <div class="flex justify-end mt-4">
-                            <button 
-                                @click="showAll = !showAll" 
-                                class="text-xs font-medium text-blue-600 hover:text-blue-500 transition-colors">
-                                <span x-text="showAll ? 'Show less' : 'View all countries'"></span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Futuristic Bar Graph Widget -->
-                    <div class="lg:col-span-6 card p-4 self-start" style="min-height: 0;">
+                    <!-- Turnout Distribution by Country of Origin -->
+                    <div class="lg:col-span-4 card p-4" style="min-height: 300px; max-height: 400px;">
                          <div class="flex items-center justify-between mb-4">
                              <div>
-                                 <h3 class="font-medium">Turnout Distribution by Country of Origin (option 3)</h3>
+                                 <h3 class="font-medium">Turnout Distribution by Country of Origin</h3>
                                  <p class="text-xs text-slate-500 mt-1">Hover to see total voters for each country</p>
                              </div>
                              <div class="flex items-center gap-2 text-xs text-gray-500">
@@ -938,7 +748,7 @@
                                  </span>
                              </div>
                          </div>
-                         <div class="relative h-[220px]">
+                         <div class="relative h-[320px]">
                              <canvas id="turnoutBarChart"></canvas>
                          </div>
                      </div>
