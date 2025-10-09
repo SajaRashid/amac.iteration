@@ -304,6 +304,61 @@
             </div>
         </header>
 
+        <!-- Mobile-Only Voter Turnout Widget (above filters) -->
+        <div class="lg:hidden mb-4">
+            <div class="card p-4 space-y-4" x-data="turnoutGaugeWidget()" :class="expanded ? 'ring-2 ring-primary/50 shadow-lg shadow-primary/20' : ''">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-sm text-slate-500 uppercase tracking-wide">Voting Turnout</p>
+                        <h3 class="text-lg font-semibold text-slate-900 mt-1">Current Participation Snapshot</h3>
+                    </div>
+                    <button class="p-2 rounded-lg bg-slate-100/80 text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors" @click="toggleFullscreen" :aria-pressed="expanded">
+                        <i :data-lucide="expanded ? 'minimize' : 'expand'" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <div class="relative flex items-center justify-center">
+                    <svg viewBox="0 0 200 120" class="w-full max-w-xs">
+                        <defs>
+                            <linearGradient id="turnoutGradientMobile" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#2563eb" />
+                                <stop offset="100%" stop-color="#22d3ee" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M20 100 A80 80 0 0 1 180 100" stroke="url(#turnoutGradientMobile)" stroke-width="18" stroke-linecap="round" fill="transparent" opacity="0.12" />
+                        <path :stroke-dasharray="gaugeStroke" :stroke-dashoffset="gaugeOffset" d="M20 100 A80 80 0 0 1 180 100" stroke="url(#turnoutGradientMobile)" stroke-width="18" stroke-linecap="round" fill="transparent" class="transition-all duration-500 ease-out" />
+                        <circle :cx="needlePosition.x" :cy="needlePosition.y" r="6" class="fill-white transition-all duration-500 ease-out" stroke="#2563eb" stroke-width="2" />
+                    </svg>
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[30%] text-center">
+                        <p class="text-3xl font-bold text-slate-900" x-text="turnout + '%'">53%</p>
+                        <p class="text-xs uppercase tracking-[0.35em] text-slate-500">Turnout</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                    <div class="text-center flex-1">
+                        <p class="text-xs uppercase tracking-wide text-slate-500">Eligible Voters</p>
+                        <p class="text-xl font-semibold text-slate-900" x-text="formatNumber(totalEligible)"></p>
+                    </div>
+                    <div class="h-10 w-px bg-slate-200 mx-4"></div>
+                    <div class="text-center flex-1">
+                        <p class="text-xs uppercase tracking-wide text-slate-500">Ballots Cast</p>
+                        <p class="text-xl font-semibold text-slate-900" x-text="formatNumber(totalVoted)"></p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50/60 rounded-xl p-3">
+                    <div class="flex items-center justify-between text-[11px] uppercase tracking-wider text-slate-500">
+                        <span>Trend by Election</span>
+                        <span class="text-slate-700 font-semibold" x-text="trendLabel"></span>
+                    </div>
+                    <div class="h-24 mt-2">
+                        <canvas id="turnoutTrendSparklineMobile"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Filter Bar -->
         <div class="flex flex-col lg:flex-row gap-3 mb-4">
             <!-- Election Period -->
@@ -624,7 +679,8 @@
                         </template>
                     </div>
 
-                    <div class="lg:col-span-4 card p-4 space-y-4" x-data="turnoutGaugeWidget()" :class="expanded ? 'ring-2 ring-primary/50 shadow-lg shadow-primary/20' : ''">
+                    <!-- Desktop-Only Voter Turnout Widget (hidden on mobile) -->
+                    <div class="hidden lg:block lg:col-span-4 card p-4 space-y-4" x-data="turnoutGaugeWidget()" :class="expanded ? 'ring-2 ring-primary/50 shadow-lg shadow-primary/20' : ''">
                         <div class="flex items-start justify-between">
                             <div>
                                 <p class="text-sm text-slate-500 uppercase tracking-wide">Voting Turnout</p>
@@ -3060,38 +3116,47 @@
         });
 
         function initializeCharts() {
-            // Initialize turnout chart
+            // Initialize turnout chart configuration
+            const turnoutChartConfig = {
+                type: 'line',
+                data: {
+                    labels: ['Nov 23', 'Feb 24', 'Aug 24', 'Nov 24', 'Aug 25'],
+                    datasets: [{
+                        data: [49, 52, 55, 51, 53],
+                        borderColor: '#2563eb',
+                        borderWidth: 2.5,
+                        pointRadius: 0,
+                        tension: 0.4,
+                        fill: {
+                            target: 'origin',
+                            above: 'rgba(37, 99, 235, 0.12)'
+                        }
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { display: false },
+                        y: { display: false, suggestedMin: 45, suggestedMax: 60 }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    }
+                }
+            };
+
+            // Initialize desktop turnout chart
             const turnoutCtx = document.getElementById('turnoutTrendSparkline');
             if (turnoutCtx) {
-                new Chart(turnoutCtx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Nov 23', 'Feb 24', 'Aug 24', 'Nov 24', 'Aug 25'],
-                        datasets: [{
-                            data: [49, 52, 55, 51, 53],
-                            borderColor: '#2563eb',
-                            borderWidth: 2.5,
-                            pointRadius: 0,
-                            tension: 0.4,
-                            fill: {
-                                target: 'origin',
-                                above: 'rgba(37, 99, 235, 0.12)'
-                            }
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: { display: false },
-                            y: { display: false, suggestedMin: 45, suggestedMax: 60 }
-                        },
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: { enabled: false }
-                        }
-                    }
-                });
+                new Chart(turnoutCtx, turnoutChartConfig);
+            }
+
+            // Initialize mobile turnout chart
+            const turnoutCtxMobile = document.getElementById('turnoutTrendSparklineMobile');
+            if (turnoutCtxMobile) {
+                new Chart(turnoutCtxMobile, JSON.parse(JSON.stringify(turnoutChartConfig)));
             }
 
             // Initialize ethnicity chart
